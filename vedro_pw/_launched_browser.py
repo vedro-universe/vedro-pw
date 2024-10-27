@@ -1,9 +1,10 @@
 from typing import Any, Optional
 
 import vedro
-from playwright.async_api import Browser, BrowserType, async_playwright
+from playwright.async_api import BrowserType, async_playwright
 from vedro import defer
 
+from ._configurable_browser import ConfigurableBrowser
 from ._pw_browser import PlaywrightBrowser
 from ._runtime_config import runtime_config as _runtime_config
 
@@ -11,7 +12,8 @@ __all__ = ("launched_browser",)
 
 
 @vedro.context
-async def launched_browser(browser: Optional[PlaywrightBrowser] = None, **kwargs: Any) -> Browser:
+async def launched_browser(browser: Optional[PlaywrightBrowser] = None,
+                           **kwargs: Any) -> ConfigurableBrowser:
     browser_name = browser.value if browser else _runtime_config.get_browser().value
     options = {
         **kwargs,
@@ -26,4 +28,4 @@ async def launched_browser(browser: Optional[PlaywrightBrowser] = None, **kwargs
     browser_type: BrowserType = getattr(pw, browser_name)
     browser_instance = await browser_type.launch(**options)
 
-    return browser_instance
+    return ConfigurableBrowser(browser_instance)
