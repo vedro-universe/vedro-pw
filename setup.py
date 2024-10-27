@@ -14,7 +14,7 @@ def find_dev_required():
 setup(
     name="vedro-pw",
     version="0.0.1",
-    description="",
+    description="<description>",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Nikita Tsvetkov",
@@ -36,6 +36,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Typing :: Typed",
     ],
 )
