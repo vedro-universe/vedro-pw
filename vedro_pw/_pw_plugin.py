@@ -30,9 +30,14 @@ class PlaywrightPlugin(Plugin):
         self._browser: PlaywrightBrowser = config.browser
         self._headed: bool = config.headed
         self._slowmo: int = config.slowmo
+
+        self._remote: bool = config.remote
+        self._remote_endpoint: str = config.remote_endpoint
+
         self._capture_screenshots: CaptureMode = config.capture_screenshots
         self._capture_video: CaptureMode = config.capture_video
         self._capture_trace: CaptureMode = config.capture_trace
+
         self._prev_scenario_id: Union[str, None] = None
         self._captured_trace: Union[Path, None] = None
         self._captured_video: Union[Path, None] = None
@@ -61,6 +66,12 @@ class PlaywrightPlugin(Plugin):
                            help=("Slow down Playwright operations by the specified milliseconds "
                                  f"(default: {self._slowmo})"))
 
+        group.add_argument("--pw-remote", action="store_true", default=self._remote,
+                           help=f"Connect to a remote browser instance (default: {self._remote})")
+        group.add_argument("--pw-remote-endpoint", action="store", default=self._remote_endpoint,
+                           help=("WebSocket endpoint URL for the remote browser "
+                                 f"(default: {self._remote_endpoint})"))
+
         group.add_argument("--pw-screenshots", action="store",
                            type=CaptureMode, choices=CaptureMode,
                            default=self._capture_screenshots,
@@ -81,6 +92,9 @@ class PlaywrightPlugin(Plugin):
         self._runtime_config.set_browser(event.args.pw_browser)
         self._runtime_config.set_headed(event.args.pw_headed)
         self._runtime_config.set_slowmo(event.args.pw_slowmo)
+
+        self._runtime_config.set_remote(event.args.pw_remote)
+        self._runtime_config.set_remote_endpoint(event.args.pw_remote_endpoint)
 
         self._capture_screenshots = event.args.pw_screenshots
         self._capture_video = event.args.pw_video
@@ -198,6 +212,9 @@ class Playwright(PluginConfig):
     browser: PlaywrightBrowser = PlaywrightBrowser.CHROMIUM
     headed: bool = False
     slowmo: int = 0
+
+    remote: bool = False
+    remote_endpoint: str = "ws://localhost:3000"
 
     capture_screenshots: CaptureMode = CaptureMode.NEVER
     capture_video: CaptureMode = CaptureMode.NEVER

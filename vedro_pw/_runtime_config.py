@@ -11,6 +11,9 @@ class RuntimeConfig:
         self._headed: bool = False
         self._slowmo: int = 0
 
+        self._remote: bool = False
+        self._remote_endpoint: str = ""
+
         self._browser_contexts: Dict[Any, Any] = {}
 
         self._should_capture_trace: bool = False
@@ -47,6 +50,20 @@ class RuntimeConfig:
         if value < 0:
             raise ValueError("Slowmo must be a non-negative integer")
         self._slowmo = value
+
+    # Remote
+
+    def is_remote(self) -> bool:
+        return self._remote
+
+    def set_remote(self, value: bool) -> None:
+        self._remote = value
+
+    def get_remote_endpoint(self) -> str:
+        return self._remote_endpoint
+
+    def set_remote_endpoint(self, value: str) -> None:
+        self._remote_endpoint = value
 
     # Browser Context
 

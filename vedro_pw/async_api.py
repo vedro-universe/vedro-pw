@@ -8,12 +8,13 @@ from ._configurable_browser import ConfigurableBrowser
 from ._pw_browser import PlaywrightBrowser
 from ._runtime_config import runtime_config as _runtime_config
 
-__all__ = ("launched_browser", "created_browser_context",)
+__all__ = ("launched_browser", "launched_local_browser", "launched_remote_browser",
+           "created_browser_context", "opened_browser_page",)
 
 
 @vedro.context
-async def launched_browser(browser: Optional[PlaywrightBrowser] = None,
-                           **kwargs: Any) -> ConfigurableBrowser:
+async def launched_local_browser(browser: Optional[PlaywrightBrowser] = None,
+                                 **kwargs: Any) -> ConfigurableBrowser:
     browser_name = browser.value if browser else _runtime_config.get_browser().value
     options = {
         **kwargs,
@@ -29,6 +30,36 @@ async def launched_browser(browser: Optional[PlaywrightBrowser] = None,
     browser_instance = await browser_type.launch(**options)
 
     return ConfigurableBrowser(browser_instance)
+
+
+@vedro.context
+async def launched_remote_browser(browser: Optional[PlaywrightBrowser] = None,
+                                  **kwargs: Any) -> ConfigurableBrowser:
+    browser_name = browser.value if browser else _runtime_config.get_browser().value
+
+    options = {
+        **kwargs,
+        "ws_endpoint": kwargs.get("ws_endpoint", _runtime_config.get_remote_endpoint()),
+        "slow_mo": kwargs.get("slow_mo", _runtime_config.get_slowmo()),
+    }
+
+    cm = async_playwright()
+    pw = await cm.__aenter__()
+    defer(cm.__aexit__)
+
+    browser_type: BrowserType = getattr(pw, browser_name)
+    browser_instance = await browser_type.connect(**options)
+
+    return ConfigurableBrowser(browser_instance)
+
+
+@vedro.context
+async def launched_browser(browser: Optional[PlaywrightBrowser] = None,
+                           **kwargs: Any) -> ConfigurableBrowser:
+    if _runtime_config.is_remote():
+        return await launched_remote_browser(browser, **kwargs)
+    else:
+        return await launched_local_browser(browser, **kwargs)
 
 
 @vedro.context
