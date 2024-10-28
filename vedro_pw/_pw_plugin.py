@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, Type, Union
 
 from vedro import FileArtifact, create_tmp_dir, create_tmp_file
-from vedro.core import Dispatcher, Plugin, PluginConfig, ScenarioResult, StepResult
+from vedro.core import Dispatcher, Plugin, PluginConfig
 from vedro.events import (
     ArgParsedEvent,
     ArgParseEvent,
@@ -136,8 +136,9 @@ class PlaywrightPlugin(Plugin):
         if self._runtime_config.should_capture_screenshots():
             for context in self._runtime_config.get_browser_contexts():
                 for page in context.pages:
-                    screenshot_path = create_tmp_file(prefix=f"{event.step_result.step.name}_",
-                                                      suffix=".png")
+                    screenshot_number = len(self._captured_screenshots) + 1
+                    prefix = f"step{screenshot_number:02}_{event.step_result.step.name}_"
+                    screenshot_path = create_tmp_file(prefix=prefix, suffix=".png")
                     await page.screenshot(path=screenshot_path)
                     self._captured_screenshots[event.step_result.step.name] = screenshot_path
 
@@ -160,10 +161,11 @@ class PlaywrightPlugin(Plugin):
             else:
                 captured_video.unlink(missing_ok=True)
 
+        step_results = {x.step.name: x for x in event.scenario_result.step_results}
         for step_name, screenshot in self._captured_screenshots.items():
             if self._should_retain(self._capture_screenshots, is_failed):
-                step_result = self._find_step(step_name, event.scenario_result)
-                screenshot_artifact = FileArtifact(screenshot.name, "image/png", screenshot)
+                screenshot_artifact = self._create_screenshot_artifact(screenshot)
+                step_result = step_results.get(step_name, event.scenario_result)
                 step_result.attach(screenshot_artifact)
             else:
                 screenshot.unlink(missing_ok=True)
@@ -175,20 +177,13 @@ class PlaywrightPlugin(Plugin):
                     return file
         return None
 
-    def _find_step(self, step_name: str,
-                   scenario_result: ScenarioResult) -> Union[StepResult, ScenarioResult]:
-        for step_result in scenario_result.step_results:
-            if step_result.step.name == step_name:
-                return step_result
-        return scenario_result
-
     def _create_trace_artifact(self, trace_path: Path) -> FileArtifact:
         return FileArtifact(trace_path.name, "application/zip", trace_path)
 
     def _create_video_artifact(self, video_path: Path) -> FileArtifact:
         return FileArtifact(f"pw_video_{video_path.name}", "video/webm", video_path)
 
-    def _create_screen_artifact(self, screenshot_path: Path) -> FileArtifact:
+    def _create_screenshot_artifact(self, screenshot_path: Path) -> FileArtifact:
         return FileArtifact(screenshot_path.name, "image/png", screenshot_path)
 
     def on_cleanup(self, event: CleanupEvent) -> None:
@@ -197,7 +192,8 @@ class PlaywrightPlugin(Plugin):
 
 class Playwright(PluginConfig):
     plugin = PlaywrightPlugin
-    description = "<desc>"
+    description = ("Integrates Playwright for automated browser testing "
+                   "with customizable configuration options")
 
     browser: PlaywrightBrowser = PlaywrightBrowser.CHROMIUM
     headed: bool = False
