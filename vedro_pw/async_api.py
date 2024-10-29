@@ -26,6 +26,12 @@ async def launched_local_browser(browser: Optional[PlaywrightBrowser] = None,
     pw = await cm.__aenter__()
     defer(cm.__aexit__)
 
+    if device_name := _runtime_config.get_device():
+        device_options = pw.devices.get(device_name)
+        if device_options is None:
+            raise ValueError(f"Device '{device_name}' is not supported or does not exist")
+        _runtime_config.set_device_options(device_options)
+
     browser_type: BrowserType = getattr(pw, browser_name)
     browser_instance = await browser_type.launch(**options)
 
@@ -46,6 +52,12 @@ async def launched_remote_browser(browser: Optional[PlaywrightBrowser] = None,
     cm = async_playwright()
     pw = await cm.__aenter__()
     defer(cm.__aexit__)
+
+    if device_name := _runtime_config.get_device():
+        device_options = pw.devices.get(device_name)
+        if device_options is None:
+            raise ValueError(f"Device '{device_name}' is not supported or does not exist")
+        _runtime_config.set_device_options(device_options)
 
     browser_type: BrowserType = getattr(pw, browser_name)
     browser_instance = await browser_type.connect(**options)

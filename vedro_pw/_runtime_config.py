@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from ._pw_browser import PlaywrightBrowser
 
@@ -10,6 +10,9 @@ class RuntimeConfig:
         self._browser: PlaywrightBrowser = PlaywrightBrowser.CHROMIUM
         self._headed: bool = False
         self._slowmo: int = 0
+
+        self._device: Union[str, None] = None
+        self._device_options: Dict[str, Any] = {}
 
         self._remote: bool = False
         self._remote_endpoint: str = ""
@@ -117,6 +120,20 @@ class RuntimeConfig:
 
     def set_screenshot_options(self, options: Dict[str, Any]) -> None:
         self._screenshot_options = options
+
+    # Device Options
+
+    def get_device(self) -> Union[str, None]:
+        return self._device
+
+    def set_device(self, value: str) -> None:
+        self._device = value
+
+    def get_device_options(self) -> Dict[str, Any]:
+        return self._device_options
+
+    def set_device_options(self, options: Dict[str, Any]) -> None:
+        self._device_options = options
 
 
 runtime_config = RuntimeConfig()

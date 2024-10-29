@@ -88,10 +88,14 @@ class PlaywrightPlugin(Plugin):
                            help=("Control trace recording behavior "
                                  f"(default: {self._capture_trace})"))
 
+        group.add_argument("--pw-device", action="store",
+                           help="Emulate a specific device (e.g., iPhone 15 Pro or Pixel 7)")
+
     def on_arg_parsed(self, event: ArgParsedEvent) -> None:
         self._runtime_config.set_browser(event.args.pw_browser)
         self._runtime_config.set_headed(event.args.pw_headed)
         self._runtime_config.set_slowmo(event.args.pw_slowmo)
+        self._runtime_config.set_device(event.args.pw_device)
 
         self._runtime_config.set_remote(event.args.pw_remote)
         self._runtime_config.set_remote_endpoint(event.args.pw_remote_endpoint)

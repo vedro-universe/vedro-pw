@@ -16,7 +16,10 @@ class ConfigurableBrowser(Browser):
         self._runtime_config = runtime_config
 
     async def new_context(self, **kwargs: Any) -> BrowserContext:
-        options = {**kwargs}
+        options = {
+            **_runtime_config.get_device_options(),
+            **kwargs
+        }
 
         if self._runtime_config.should_capture_video():
             video_options = self._runtime_config.get_video_options()
