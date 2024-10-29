@@ -5,7 +5,7 @@
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/vedro-pw?style=flat-square)](https://pypi.python.org/pypi/vedro-pw/)
 [![Python Version](https://img.shields.io/pypi/pyversions/vedro-pw.svg?style=flat-square)](https://pypi.python.org/pypi/vedro-pw/)
 
-The Playwright Plugin integrates [Playwright](https://playwright.dev/) with [Vedro](https://vedro.io/), enabling automated browser testing with a wide range of configurable options.
+The `vedro-pw` plugin allows you to use [Playwright](https://playwright.dev/) within your [Vedro](https://vedro.io/) scenarios for end-to-end testing of web applications.
 
 ## Installation
 
@@ -53,7 +53,13 @@ class Config(vedro.Config):
 
 ## Usage
 
-### Basic Scenario Example
+Use the provided context functions in your scenarios to interact with Playwright:
+
+- `launched_browser`: Launches a local or remote browser based on the configuration.
+- `created_browser_context`: Creates a new browser context.
+- `opened_browser_page`: Opens a new page in the browser context.
+
+### Basic Example
 
 Here's a simple Vedro scenario that opens the Playwright homepage and verifies the page title.
 
@@ -73,3 +79,36 @@ class Scenario(vedro.Scenario):
     async def then(self):
         assert await self.page.title() == "Playwright"
 ```
+
+## Command-Line Options
+
+The plugin adds several command-line arguments for flexibility:
+
+| Option                 | Description                                                             | Default               |
+|------------------------|-------------------------------------------------------------------------|-----------------------|
+| `--pw-browser`         | Browser to use (`chromium`, `firefox`, `webkit`)                        | `chromium`            |
+| `--pw-headed`          | Run browser in headed mode                                              | `False`               |
+| `--pw-slowmo`          | Delay operations by specified milliseconds                              | `0`                   |
+| `--pw-remote`          | Connect to a remote browser instance                                    | `False`               |
+| `--pw-remote-endpoint` | WebSocket endpoint for remote browser                                   | `ws://localhost:3000` |
+| `--pw-screenshots`     | Screenshot capturing (`always`, `on-failure`, `on-reschedule`, `never`) | `never`               |
+| `--pw-video`           | Video recording (`always`, `on-failure`, `on-reschedule`, `never`)      | `never`               |
+| `--pw-trace`           | Trace recording (`always`, `on-failure`, `on-reschedule`, `never`)      | `never`               |
+| `--pw-device`          | Emulate a specific device                                               | `None`                |
+
+### Example Usage
+
+```shell
+$ vedro run --pw-browser=firefox --pw-headed --pw-screenshots=on-failure --save-artifacts
+```
+
+### Capture Modes
+
+`CaptureMode` determines when to capture artifacts:
+
+- `never`: Do not capture.
+- `on-failure`: Capture only when a scenario fails.
+- `on-reschedule`: Capture when a scenario is rescheduled.
+- `always`: Always capture.
+
+Artifacts like screenshots, videos, and traces are attached to the scenario results and can be used in reports.
