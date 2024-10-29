@@ -20,6 +20,7 @@ async def launched_local_browser(browser: Optional[PlaywrightBrowser] = None,
         **kwargs,
         "headless": kwargs.get("headless", not _runtime_config.is_headed()),
         "slow_mo": kwargs.get("slow_mo", _runtime_config.get_slowmo()),
+        "timeout": kwargs.get("timeout", _runtime_config.get_browser_timeout()),
     }
 
     cm = async_playwright()

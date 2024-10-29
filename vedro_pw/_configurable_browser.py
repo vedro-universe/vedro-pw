@@ -29,6 +29,13 @@ class ConfigurableBrowser(Browser):
         defer(context.close)
         defer(self._runtime_config.remove_browser_context, context)
 
+        default_timeout = self._runtime_config.get_timeout()
+        if default_timeout is not None:
+            context.set_default_timeout(default_timeout)
+        navigation_timeout = self._runtime_config.get_navigation_timeout()
+        if navigation_timeout is not None:
+            context.set_default_navigation_timeout(navigation_timeout)
+
         if self._runtime_config.should_capture_trace():
             trace_options = self._runtime_config.get_trace_options()
             await context.tracing.start(screenshots=trace_options["screenshots"],

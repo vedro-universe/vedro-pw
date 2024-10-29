@@ -38,6 +38,10 @@ class PlaywrightPlugin(Plugin):
         self._capture_video: CaptureMode = config.capture_video
         self._capture_trace: CaptureMode = config.capture_trace
 
+        self._timeout: Union[int, None] = config.timeout
+        self._navigation_timeout: Union[int, None] = config.navigation_timeout
+        self._browser_timeout: Union[int, None] = config.browser_timeout
+
         self._prev_scenario_id: Union[str, None] = None
         self._captured_trace: Union[Path, None] = None
         self._captured_video: Union[Path, None] = None
@@ -103,6 +107,13 @@ class PlaywrightPlugin(Plugin):
         self._capture_screenshots = event.args.pw_screenshots
         self._capture_video = event.args.pw_video
         self._capture_trace = event.args.pw_trace
+
+        if self._timeout is not None:
+            self._runtime_config.set_timeout(self._timeout)
+        if self._navigation_timeout is not None:
+            self._runtime_config.set_navigation_timeout(self._navigation_timeout)
+        if self._browser_timeout is not None:
+            self._runtime_config.set_browser_timeout(self._browser_timeout)
 
     async def on_scenario_run(self, event: ScenarioRunEvent) -> None:
         is_rescheduled = (event.scenario_result.scenario.unique_id == self._prev_scenario_id)
@@ -223,3 +234,7 @@ class Playwright(PluginConfig):
     capture_screenshots: CaptureMode = CaptureMode.NEVER
     capture_video: CaptureMode = CaptureMode.NEVER
     capture_trace: CaptureMode = CaptureMode.NEVER
+
+    timeout: Union[int, None] = None
+    navigation_timeout: Union[int, None] = None
+    browser_timeout: Union[int, None] = None

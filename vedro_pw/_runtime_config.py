@@ -17,6 +17,10 @@ class RuntimeConfig:
         self._remote: bool = False
         self._remote_endpoint: str = ""
 
+        self._timeout: Union[int, None] = None
+        self._navigation_timeout: Union[int, None] = None
+        self._browser_timeout: Union[int, None] = None
+
         self._browser_contexts: Dict[Any, Any] = {}
 
         self._should_capture_trace: bool = False
@@ -134,6 +138,26 @@ class RuntimeConfig:
 
     def set_device_options(self, options: Dict[str, Any]) -> None:
         self._device_options = options
+
+    # Timeouts
+
+    def set_timeout(self, value: int) -> None:
+        self._timeout = value
+
+    def get_timeout(self) -> Union[int, None]:
+        return self._timeout
+
+    def set_navigation_timeout(self, value: int) -> None:
+        self._navigation_timeout = value
+
+    def get_navigation_timeout(self) -> Union[int, None]:
+        return self._navigation_timeout
+
+    def set_browser_timeout(self, value: int) -> None:
+        self._browser_timeout = value
+
+    def get_browser_timeout(self) -> Union[int, None]:
+        return self._browser_timeout
 
 
 runtime_config = RuntimeConfig()
