@@ -95,6 +95,7 @@ The plugin adds several command-line arguments for flexibility:
 | `--pw-video`           | Video recording (`always`, `on-failure`, `on-reschedule`, `never`)      | `never`               |
 | `--pw-trace`           | Trace recording (`always`, `on-failure`, `on-reschedule`, `never`)      | `never`               |
 | `--pw-device`          | Emulate a specific device                                               | `None`                |
+| `--pw-debug`           | Enable Playwright debug mode by setting PWDEBUG=1                       | `False`               |
 
 ### Example Usage
 
