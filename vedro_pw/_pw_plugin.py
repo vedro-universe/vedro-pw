@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Dict, Type, Union
+import os
 
 from vedro import FileArtifact, create_tmp_dir, create_tmp_file
 from vedro.core import Dispatcher, Plugin, PluginConfig
@@ -95,6 +96,9 @@ class PlaywrightPlugin(Plugin):
         group.add_argument("--pw-device", action="store",
                            help="Emulate a specific device (e.g., iPhone 15 Pro or Pixel 7)")
 
+        group.add_argument("--pw-debug", action="store_true", default=False,
+                           help="Enable Playwright debug mode by setting PWDEBUG=1")
+
     def on_arg_parsed(self, event: ArgParsedEvent) -> None:
         self._runtime_config.set_browser(event.args.pw_browser)
         self._runtime_config.set_headed(event.args.pw_headed)
@@ -107,6 +111,9 @@ class PlaywrightPlugin(Plugin):
         self._capture_screenshots = event.args.pw_screenshots
         self._capture_video = event.args.pw_video
         self._capture_trace = event.args.pw_trace
+
+        if event.args.pw_debug:
+            os.environ["PWDEBUG"] = "1"
 
         if self._timeout is not None:
             self._runtime_config.set_timeout(self._timeout)
