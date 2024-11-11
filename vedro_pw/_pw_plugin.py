@@ -1,6 +1,6 @@
+import os
 from pathlib import Path
 from typing import Dict, Type, Union
-import os
 
 from vedro import FileArtifact, create_tmp_dir, create_tmp_file
 from vedro.core import Dispatcher, Plugin, PluginConfig
