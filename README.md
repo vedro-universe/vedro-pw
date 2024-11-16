@@ -88,6 +88,7 @@ The plugin adds several command-line arguments for flexibility:
 |------------------------|-------------------------------------------------------------------------|-----------------------|
 | `--pw-browser`         | Browser to use (`chromium`, `firefox`, `webkit`)                        | `chromium`            |
 | `--pw-headed`          | Run browser in headed mode                                              | `False`               |
+| `--pw-headless`        | Run browser in headless mode                                            | `True`                |
 | `--pw-slowmo`          | Delay operations by specified milliseconds                              | `0`                   |
 | `--pw-remote`          | Connect to a remote browser instance                                    | `False`               |
 | `--pw-remote-endpoint` | WebSocket endpoint for remote browser                                   | `ws://localhost:3000` |
