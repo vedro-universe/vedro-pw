@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from ._pw_browser import PlaywrightBrowser
+from ._types import ScreenshotOptions, TraceOptions, VideoOptions
 
 __all__ = ("RuntimeConfig", "runtime_config",)
 
@@ -21,16 +22,17 @@ class RuntimeConfig:
     navigation_timeout: Optional[int] = None
     browser_timeout: Optional[int] = None
 
+    # using dict instead of set to store browser contexts with preserved order
     browser_contexts: Dict[Any, Any] = field(default_factory=dict)
 
     should_capture_trace: bool = False
-    trace_options: Dict[str, Any] = field(default_factory=dict)
+    trace_options: TraceOptions = field(default_factory=lambda: TraceOptions())
 
     should_capture_video: bool = False
-    video_options: Dict[str, Any] = field(default_factory=dict)
+    video_options: VideoOptions = field(default_factory=lambda: VideoOptions())
 
     should_capture_screenshots: bool = False
-    screenshot_options: Dict[str, Any] = field(default_factory=dict)
+    screenshot_options: ScreenshotOptions = field(default_factory=lambda: ScreenshotOptions())
 
     def add_browser_context(self, context: Any) -> None:
         self.browser_contexts[context] = ...

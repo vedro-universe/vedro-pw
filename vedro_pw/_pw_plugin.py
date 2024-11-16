@@ -148,7 +148,7 @@ class PlaywrightPlugin(Plugin):
             self._captured_video = create_tmp_dir(prefix="pw_video_")
             self._runtime_config.video_options = {
                 "record_video_dir": self._captured_video,
-                "record_video_size": None,
+                # "record_video_size": None,
             }
 
         self._captured_screenshots = {}
