@@ -342,44 +342,57 @@ class Playwright(PluginConfig):
     description = ("Integrates Playwright for automated browser testing "
                    "with customizable configuration options")
 
-    # Docs https://playwright.dev/python/docs/browsers
+    # Specifies the browser to use (CHROMIUM, FIREFOX, WEBKIT, or RANDOM)
+    # Docs: https://playwright.dev/python/docs/browsers
     browser: PlaywrightBrowser = PlaywrightBrowser.CHROMIUM
 
-    # Docs https://playwright.dev/docs/emulation
+    # Specifies the device to emulate (e.g., "iPhone 15 Pro" or "Pixel 7").
+    # If set to None, no device emulation will be applied.
+    # Docs: https://playwright.dev/docs/emulation
     device: Union[str, None] = None
 
+    # Determines whether the browser should run in headed (True) or headless (False) mode.
+    # Headless mode does not display a visible browser window.
     headed: bool = False
+
+    # Introduces a delay (in milliseconds) to slow down browser operations.
+    # Useful for debugging or observing the browser behavior during tests.
     slowmo: int = 0
 
+    # Determines if the browser session should connect to a remote instance.
+    # Set to True to use a remote browser, otherwise the browser will be launched locally.
     remote: bool = False
+
+    # Specifies the WebSocket endpoint URL for connecting to a remote browser.
+    # This is only used when `remote` is set to True.
     remote_endpoint: str = "ws://localhost:3000"
 
-    # Docs https://playwright.dev/python/docs/screenshots
+    # Controls whether screenshots are captured during the test run.
+    # Screenshots are created after every step, providing visual feedback for execution.
+    # Docs: https://playwright.dev/python/docs/screenshots
     capture_screenshots: CaptureMode = CaptureMode.NEVER
 
-    # Docs https://playwright.dev/python/docs/videos
+    # Controls whether videos of the browser session are recorded.
+    # Docs: https://playwright.dev/python/docs/videos
     capture_video: CaptureMode = CaptureMode.NEVER
 
-    # Docs https://playwright.dev/python/docs/trace-viewer-intro
+    # Controls whether traces of browser interactions are captured.
+    # Docs: https://playwright.dev/python/docs/trace-viewer-intro
     capture_trace: CaptureMode = CaptureMode.NEVER
 
-    # Used in context.set_default_timeout(timeout)
-    # This setting will change the default maximum time for all the methods
-    # accepting `timeout` option.
+    # Specifies the default maximum time (in milliseconds) for browser operations.
+    # This timeout applies to all methods that support the `timeout` option.
+    # It is passed to context.set_default_timeout(timeout)
+    # If set to `None`, Playwright's default timeout is used.
     timeout: Union[int, None] = None
 
-    # Used in context.set_default_navigation_timeout(navigation_timeout)
-    # This setting will change the default maximum navigation time for the following methods
-    # and related shortcuts:
-    #         - `page.go_back()`
-    #         - `page.go_forward()`
-    #         - `page.goto()`
-    #         - `page.reload()`
-    #         - `page.set_content()`
-    #         - `page.expect_navigation()`
+    # Specifies the maximum navigation timeout (in milliseconds) for browser navigation operations.
+    # This timeout applies to navigation-related methods, such as `page.goto()`.
+    # It is passed to context.set_default_navigation_timeout(navigation_timeout)
+    # If set to `None`, Playwright's default navigation timeout is used.
     navigation_timeout: Union[int, None] = None
 
-    # Used in browser_type.launch(timeout=timeout)
-    # Maximum time in milliseconds to wait for the browser instance to start.
-    # Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
+    # Specifies the maximum time (in milliseconds) to wait for the browser instance to start.
+    # This timeout applies when launching a browser using `browser_type.launch(timeout=timeout)`.
+    # Defaults to 30,000 milliseconds (30 seconds). Pass `0` to disable the timeout.
     browser_timeout: Union[int, None] = None

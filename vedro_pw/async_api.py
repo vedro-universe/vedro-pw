@@ -28,7 +28,7 @@ async def launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]]
 
     :param browser_name: The name of the browser to launch.
     :param device_name: The name of the device to emulate.
-    :param auto_close: Whether to close the browser automatically on exit.
+    :param auto_close: Whether to close the browser automatically when the scenario ends.
     :param playwright: An optional Playwright instance to use.
     :param kwargs: Additional launch options for the browser.
     :return: A ConfigurableBrowser instance.
@@ -48,7 +48,7 @@ async def launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]]
 
     :param browser_name: The name of the browser to connect to.
     :param device_name: The name of the device to emulate.
-    :param auto_close: Whether to close the browser automatically on exit.
+    :param auto_close: Whether to close the browser automatically when the scenario ends.
     :param playwright: An optional Playwright instance to use.
     :param kwargs: Additional connection options for the browser.
     :return: A ConfigurableBrowser instance.
@@ -67,7 +67,7 @@ async def launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]]
 
     :param browser_name: The name of the browser to launch or connect to.
     :param device_name: The name of the device to emulate.
-    :param auto_close: Whether to close the browser automatically on exit.
+    :param auto_close: Whether to close the browser automatically when the scenario ends.
     :param playwright: An optional Playwright instance to use.
     :param kwargs: Additional options for the browser.
     :return: A ConfigurableBrowser instance.
@@ -95,7 +95,7 @@ async def launched_local_browser(browser_name: Optional[Union[PlaywrightBrowser,
 
     :param browser_name: The name of the browser to launch.
     :param device_name: The name of the device to emulate.
-    :param auto_close: Whether to close the browser automatically on exit.
+    :param auto_close: Whether to close the browser automatically when the scenario ends.
     :param playwright: An optional Playwright instance to use.
     :param kwargs: Additional launch options for the browser.
     :return: A ConfigurableBrowser instance.
@@ -131,7 +131,7 @@ async def launched_remote_browser(browser_name: Optional[Union[PlaywrightBrowser
 
     :param browser_name: The name of the browser to connect to.
     :param device_name: The name of the device to emulate.
-    :param auto_close: Whether to close the browser automatically on exit.
+    :param auto_close: Whether to close the browser automatically when the scenario ends.
     :param playwright: An optional Playwright instance to use.
     :param kwargs: Additional connection options for the browser.
     :return: A ConfigurableBrowser instance.
@@ -199,7 +199,8 @@ async def _get_playwright_instance(*, auto_close: bool = True) -> AsyncPlaywrigh
     """
     Get a Playwright instance.
 
-    :param auto_close: Whether to automatically close the Playwright instance on exit.
+    :param auto_close: Whether to automatically close the Playwright instance when
+                       the scenario ends.
     :return: An AsyncPlaywright instance.
     """
     playwright_manager = async_playwright()
