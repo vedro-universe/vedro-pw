@@ -65,11 +65,16 @@ class PlaywrightPlugin(Plugin):
                            type=PlaywrightBrowser, choices=PlaywrightBrowser,
                            default=self._browser,
                            help=f"Specify the browser to use (default: {self._browser})")
-        group.add_argument("--pw-headed", action="store_true", default=self._headed,
-                           help=f"Run the browser in headed mode (default: {self._headed})")
         group.add_argument("--pw-slowmo", action="store", type=int, default=self._slowmo,
                            help=("Slow down Playwright operations by the specified milliseconds "
                                  f"(default: {self._slowmo})"))
+
+        mode_group = group.add_mutually_exclusive_group()
+        mode_group.add_argument("--pw-headed", action="store_true", default=None,
+                                help=f"Run the browser in headed mode (default: {self._headed})")
+        mode_group.add_argument("--pw-headless", action="store_true", default=None,
+                                help=("Run the browser in headless mode "
+                                      f"(default: {not self._headed})"))
 
         group.add_argument("--pw-remote", action="store_true", default=self._remote,
                            help=f"Connect to a remote browser instance (default: {self._remote})")
@@ -94,19 +99,25 @@ class PlaywrightPlugin(Plugin):
                                  f"(default: {self._capture_trace})"))
 
         group.add_argument("--pw-device", action="store",
-                           help="Emulate a specific device (e.g., iPhone 15 Pro or Pixel 7)")
+                           help="Emulate a specific device (e.g., 'iPhone 15 Pro' or 'Pixel 7')")
 
         group.add_argument("--pw-debug", action="store_true", default=False,
                            help="Enable Playwright debug mode by setting PWDEBUG=1")
 
     def on_arg_parsed(self, event: ArgParsedEvent) -> None:
-        slomo = event.args.pw_slowmo
-        if slomo < 0:
-            raise ValueError("Slowmo must be a non-negative integer")
+        if event.args.pw_headless is not None:
+            self._runtime_config.headed = False
+        elif event.args.pw_headed is not None:
+            self._runtime_config.headed = True
+        else:
+            self._runtime_config.headed = self._headed
 
         self._runtime_config.browser_name = event.args.pw_browser
         self._runtime_config.device_name = event.args.pw_device
-        self._runtime_config.headed = event.args.pw_headed
+
+        slomo = event.args.pw_slowmo
+        if slomo < 0:
+            raise ValueError("Slowmo must be a non-negative integer")
         self._runtime_config.slowmo = slomo
 
         self._runtime_config.remote = event.args.pw_remote
