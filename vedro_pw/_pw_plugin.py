@@ -29,6 +29,7 @@ class PlaywrightPlugin(Plugin):
         super().__init__(config)
         self._runtime_config = runtime_config
         self._browser: PlaywrightBrowser = config.browser
+        self._device: Union[str, None] = config.device
         self._headed: bool = config.headed
         self._slowmo: int = config.slowmo
 
@@ -98,7 +99,7 @@ class PlaywrightPlugin(Plugin):
                            help=("Control trace recording behavior "
                                  f"(default: {self._capture_trace})"))
 
-        group.add_argument("--pw-device", action="store",
+        group.add_argument("--pw-device", action="store", default=self._device,
                            help="Emulate a specific device (e.g., 'iPhone 15 Pro' or 'Pixel 7')")
 
         group.add_argument("--pw-debug", action="store_true", default=False,
@@ -246,15 +247,25 @@ class Playwright(PluginConfig):
     description = ("Integrates Playwright for automated browser testing "
                    "with customizable configuration options")
 
+    # Docs https://playwright.dev/python/docs/browsers
     browser: PlaywrightBrowser = PlaywrightBrowser.CHROMIUM
+
+    # Docs https://playwright.dev/docs/emulation
+    device: Union[str, None] = None
+
     headed: bool = False
     slowmo: int = 0
 
     remote: bool = False
     remote_endpoint: str = "ws://localhost:3000"
 
+    # Docs https://playwright.dev/python/docs/screenshots
     capture_screenshots: CaptureMode = CaptureMode.NEVER
+
+    # Docs https://playwright.dev/python/docs/videos
     capture_video: CaptureMode = CaptureMode.NEVER
+
+    # Docs https://playwright.dev/python/docs/trace-viewer-intro
     capture_trace: CaptureMode = CaptureMode.NEVER
 
     timeout: Union[int, None] = None
