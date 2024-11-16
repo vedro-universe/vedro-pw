@@ -100,13 +100,17 @@ class PlaywrightPlugin(Plugin):
                            help="Enable Playwright debug mode by setting PWDEBUG=1")
 
     def on_arg_parsed(self, event: ArgParsedEvent) -> None:
-        self._runtime_config.set_browser(event.args.pw_browser)
-        self._runtime_config.set_headed(event.args.pw_headed)
-        self._runtime_config.set_slowmo(event.args.pw_slowmo)
-        self._runtime_config.set_device(event.args.pw_device)
+        slomo = event.args.pw_slowmo
+        if slomo < 0:
+            raise ValueError("Slowmo must be a non-negative integer")
 
-        self._runtime_config.set_remote(event.args.pw_remote)
-        self._runtime_config.set_remote_endpoint(event.args.pw_remote_endpoint)
+        self._runtime_config.browser_name = event.args.pw_browser
+        self._runtime_config.device_name = event.args.pw_device
+        self._runtime_config.headed = event.args.pw_headed
+        self._runtime_config.slowmo = slomo
+
+        self._runtime_config.remote = event.args.pw_remote
+        self._runtime_config.remote_endpoint = event.args.pw_remote_endpoint
 
         self._capture_screenshots = event.args.pw_screenshots
         self._capture_video = event.args.pw_video
@@ -116,39 +120,39 @@ class PlaywrightPlugin(Plugin):
             os.environ["PWDEBUG"] = "1"
 
         if self._timeout is not None:
-            self._runtime_config.set_timeout(self._timeout)
+            self._runtime_config.timeout = self._timeout
         if self._navigation_timeout is not None:
-            self._runtime_config.set_navigation_timeout(self._navigation_timeout)
+            self._runtime_config.navigation_timeout = self._navigation_timeout
         if self._browser_timeout is not None:
-            self._runtime_config.set_browser_timeout(self._browser_timeout)
+            self._runtime_config.browser_timeout = self._browser_timeout
 
     async def on_scenario_run(self, event: ScenarioRunEvent) -> None:
         is_rescheduled = (event.scenario_result.scenario.unique_id == self._prev_scenario_id)
         self._prev_scenario_id = event.scenario_result.scenario.unique_id
 
         self._captured_trace = None
-        self._runtime_config.set_capture_trace(False)
+        self._runtime_config.should_capture_trace = False
         if self._should_capture(self._capture_trace, is_rescheduled):
-            self._runtime_config.set_capture_trace(True)
+            self._runtime_config.should_capture_trace = True
             self._captured_trace = create_tmp_file(prefix="pw_trace_", suffix=".zip")
-            self._runtime_config.set_trace_options({
+            self._runtime_config.trace_options = {
                 "path": self._captured_trace,
                 "screenshots": True,
                 "snapshots": True,
-            })
+            }
 
         self._captured_video = None
-        self._runtime_config.set_capture_video(False)
+        self._runtime_config.should_capture_video = False
         if self._should_capture(self._capture_video, is_rescheduled):
-            self._runtime_config.set_capture_video(True)
+            self._runtime_config.should_capture_video = True
             self._captured_video = create_tmp_dir(prefix="pw_video_")
-            self._runtime_config.set_video_options({
+            self._runtime_config.video_options = {
                 "record_video_dir": self._captured_video,
                 "record_video_size": None,
-            })
+            }
 
         self._captured_screenshots = {}
-        self._runtime_config.set_capture_screenshots(
+        self._runtime_config.should_capture_screenshots = (
             self._should_capture(self._capture_screenshots, is_rescheduled)
         )
 
@@ -169,7 +173,7 @@ class PlaywrightPlugin(Plugin):
             return False
 
     async def on_step_end(self, event: Union[StepPassedEvent, StepFailedEvent]) -> None:
-        if self._runtime_config.should_capture_screenshots():
+        if self._runtime_config.should_capture_screenshots:
             for context in self._runtime_config.get_browser_contexts():
                 for page in context.pages:
                     screenshot_number = len(self._captured_screenshots) + 1

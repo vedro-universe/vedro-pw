@@ -27,17 +27,17 @@ async def launched_local_browser(browser_name: Optional[Union[PlaywrightBrowser,
 
     options = {
         **kwargs,
-        "headless": kwargs.get("headless", not _runtime_config.is_headed()),
-        "slow_mo": kwargs.get("slow_mo", _runtime_config.get_slowmo()),
-        "timeout": kwargs.get("timeout", _runtime_config.get_browser_timeout()),
+        "headless": kwargs.get("headless", not _runtime_config.headed),
+        "slow_mo": kwargs.get("slow_mo", _runtime_config.slowmo),
+        "timeout": kwargs.get("timeout", _runtime_config.browser_timeout),
     }
 
-    browser_type = get_browser_type(playwright, browser_name or _runtime_config.get_browser())
+    browser_type = get_browser_type(playwright, browser_name or _runtime_config.browser_name)
     browser_instance = await browser_type.launch(**options)
     if auto_close:
         defer(browser_instance.close)
 
-    device_options = get_device_options(playwright, device_name or _runtime_config.get_device())
+    device_options = get_device_options(playwright, device_name or _runtime_config.device_name)
     return ConfigurableBrowser(browser_instance, device_options=device_options)
 
 
@@ -53,16 +53,16 @@ async def launched_remote_browser(browser_name: Optional[Union[PlaywrightBrowser
 
     options = {
         **kwargs,
-        "ws_endpoint": kwargs.get("ws_endpoint", _runtime_config.get_remote_endpoint()),
-        "slow_mo": kwargs.get("slow_mo", _runtime_config.get_slowmo()),
+        "ws_endpoint": kwargs.get("ws_endpoint", _runtime_config.remote_endpoint),
+        "slow_mo": kwargs.get("slow_mo", _runtime_config.slowmo),
     }
 
-    browser_type = get_browser_type(playwright, browser_name or _runtime_config.get_browser())
+    browser_type = get_browser_type(playwright, browser_name or _runtime_config.browser_name)
     browser_instance = await browser_type.connect(**options)
     if auto_close:
         defer(browser_instance.close)
 
-    device_options = get_device_options(playwright, device_name or _runtime_config.get_device())
+    device_options = get_device_options(playwright, device_name or _runtime_config.device_name)
     return ConfigurableBrowser(browser_instance, device_options=device_options)
 
 
@@ -73,7 +73,7 @@ async def launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]]
                            auto_close: bool = True,
                            playwright: Optional[AsyncPlaywright] = None,
                            **kwargs: Any) -> ConfigurableBrowser:
-    if _runtime_config.is_remote():
+    if _runtime_config.remote:
         return await launched_remote_browser(browser_name, device_name,
                                              auto_close=auto_close,
                                              playwright=playwright,

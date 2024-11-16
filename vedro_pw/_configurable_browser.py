@@ -24,23 +24,23 @@ class ConfigurableBrowser(Browser):
             **kwargs
         }
 
-        if self._runtime_config.should_capture_video():
-            video_options = self._runtime_config.get_video_options()
+        if self._runtime_config.should_capture_video:
+            video_options = self._runtime_config.video_options
             options["record_video_dir"] = video_options["record_video_dir"]
 
         context = await super().new_context(**options)
         defer(context.close)
         defer(self._runtime_config.remove_browser_context, context)
 
-        default_timeout = self._runtime_config.get_timeout()
+        default_timeout = self._runtime_config.timeout
         if default_timeout is not None:
             context.set_default_timeout(default_timeout)
-        navigation_timeout = self._runtime_config.get_navigation_timeout()
+        navigation_timeout = self._runtime_config.navigation_timeout
         if navigation_timeout is not None:
             context.set_default_navigation_timeout(navigation_timeout)
 
-        if self._runtime_config.should_capture_trace():
-            trace_options = self._runtime_config.get_trace_options()
+        if self._runtime_config.should_capture_trace:
+            trace_options = self._runtime_config.trace_options
             await context.tracing.start(screenshots=trace_options["screenshots"],
                                         snapshots=trace_options["snapshots"])
             defer(context.tracing.stop, path=trace_options["path"])
