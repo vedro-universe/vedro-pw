@@ -12,6 +12,18 @@ __all__ = ("get_browser_type", "get_device_options",)
 
 def get_browser_type(playwright: AsyncPlaywright,
                      browser_name: Union[PlaywrightBrowser, str]) -> BrowserType:
+    """
+    Retrieve the `BrowserType` instance corresponding to the given browser name.
+
+    If `PlaywrightBrowser.RANDOM` is passed, a random browser type is selected
+    from the available options (`CHROMIUM`, `FIREFOX`, `WEBKIT`).
+
+    :param playwright: The Playwright instance to retrieve the browser type from.
+    :param browser_name: The name of the browser, either as a `PlaywrightBrowser` enum
+                         or a string.
+    :return: The `BrowserType` instance for the specified browser.
+    :raises AttributeError: If the specified browser is not available in the Playwright instance.
+    """
     if isinstance(browser_name, PlaywrightBrowser):
         browser_name = browser_name.value
 
@@ -24,6 +36,20 @@ def get_browser_type(playwright: AsyncPlaywright,
 
 def get_device_options(playwright: AsyncPlaywright,
                        device_name: Union[str, None]) -> Union[DeviceOptions, None]:
+    """
+    Retrieve the device options for the specified device name.
+
+    Device options define emulation settings such as viewport size, user agent,
+    and other device-specific properties. This function ensures the device exists
+    in Playwright's supported devices.
+
+    :param playwright: The Playwright instance to retrieve device options from.
+    :param device_name: The name of the device to emulate. If None, no device
+                        options are returned.
+    :return: A `DeviceOptions` dictionary containing the emulation options, or None
+             if `device_name` is None.
+    :raises ValueError: If the specified device is not supported by Playwright.
+    """
     if device_name is None:
         return None
 

@@ -1,3 +1,10 @@
+"""
+Provides compatibility for the `Unpack` type hint across Python versions.
+
+This module ensures that the `Unpack` type hint is available regardless of whether it is natively
+available in the `typing` module (for newer Python versions) or needs to be imported from
+`typing_extensions`. If neither is available, it defines a fallback for `Unpack`.
+"""
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

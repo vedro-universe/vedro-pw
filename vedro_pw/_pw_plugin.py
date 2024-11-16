@@ -7,7 +7,6 @@ from vedro.core import Dispatcher, Plugin, PluginConfig
 from vedro.events import (
     ArgParsedEvent,
     ArgParseEvent,
-    CleanupEvent,
     ScenarioFailedEvent,
     ScenarioPassedEvent,
     ScenarioRunEvent,
@@ -24,8 +23,22 @@ __all__ = ("Playwright", "PlaywrightPlugin",)
 
 
 class PlaywrightPlugin(Plugin):
+    """
+    Integrates Playwright with Vedro for browser-based testing.
+
+    This plugin provides configurations for browser type, screenshot capturing,
+    video recording, trace capturing, and more. It manages the Playwright runtime
+    configurations and collects artifacts during test execution.
+    """
+
     def __init__(self, config: Type["Playwright"], *,
                  runtime_config: RuntimeConfig = _runtime_config) -> None:
+        """
+        Initialize the PlaywrightPlugin with the provided configuration.
+
+        :param config: The Playwright configuration class.
+        :param runtime_config: The runtime configuration for Playwright.
+        """
         super().__init__(config)
         self._runtime_config = runtime_config
         self._browser: PlaywrightBrowser = config.browser
@@ -50,16 +63,27 @@ class PlaywrightPlugin(Plugin):
         self._captured_screenshots: Dict[str, Path] = {}
 
     def subscribe(self, dispatcher: Dispatcher) -> None:
+        """
+        Subscribe to the necessary Vedro events for managing Playwright configurations.
+
+        :param dispatcher: The event dispatcher to register listeners on.
+        """
         dispatcher.listen(ArgParseEvent, self.on_arg_parse) \
                   .listen(ArgParsedEvent, self.on_arg_parsed) \
                   .listen(ScenarioRunEvent, self.on_scenario_run) \
                   .listen(StepPassedEvent, self.on_step_end) \
                   .listen(StepFailedEvent, self.on_step_end) \
                   .listen(ScenarioPassedEvent, self.on_scenario_end) \
-                  .listen(ScenarioFailedEvent, self.on_scenario_end) \
-                  .listen(CleanupEvent, self.on_cleanup)
+                  .listen(ScenarioFailedEvent, self.on_scenario_end)
 
     def on_arg_parse(self, event: ArgParseEvent) -> None:
+        """
+        Handle the event when command-line arguments are being parsed.
+
+        Adds Playwright-specific arguments to the argument parser.
+
+        :param event: The ArgParseEvent instance containing the argument parser.
+        """
         group = event.arg_parser.add_argument_group("Playwright")
 
         group.add_argument("--pw-browser", action="store",
@@ -106,6 +130,14 @@ class PlaywrightPlugin(Plugin):
                            help="Enable Playwright debug mode by setting PWDEBUG=1")
 
     def on_arg_parsed(self, event: ArgParsedEvent) -> None:
+        """
+        Handle the event after command-line arguments have been parsed.
+
+        Sets runtime configuration values based on the parsed arguments.
+
+        :param event: The ArgParsedEvent instance containing parsed arguments.
+        :raises ValueError: If the `--pw-slowmo` value is negative.
+        """
         if event.args.pw_headless is not None:
             self._runtime_config.headed = False
         elif event.args.pw_headed is not None:
@@ -139,6 +171,13 @@ class PlaywrightPlugin(Plugin):
             self._runtime_config.browser_timeout = self._browser_timeout
 
     async def on_scenario_run(self, event: ScenarioRunEvent) -> None:
+        """
+        Handle the event when a scenario begins execution.
+
+        Configures trace, video, and screenshot capturing based on the scenario's state.
+
+        :param event: The ScenarioRunEvent instance.
+        """
         is_rescheduled = (event.scenario_result.scenario.unique_id == self._prev_scenario_id)
         self._prev_scenario_id = event.scenario_result.scenario.unique_id
 
@@ -169,6 +208,13 @@ class PlaywrightPlugin(Plugin):
         )
 
     def _should_capture(self, capture_mode: CaptureMode, is_rescheduled: bool) -> bool:
+        """
+        Determine if an artifact should be captured based on the capture mode.
+
+        :param capture_mode: The mode specifying when to capture the artifact.
+        :param is_rescheduled: Whether the scenario has been rescheduled.
+        :return: True if the artifact should be captured, False otherwise.
+        """
         if capture_mode in (CaptureMode.ALWAYS, CaptureMode.ON_FAILURE):
             return True
         elif capture_mode == CaptureMode.ON_RESCHEDULE and is_rescheduled:
@@ -177,6 +223,13 @@ class PlaywrightPlugin(Plugin):
             return False
 
     def _should_retain(self, capture_mode: CaptureMode, is_failed: bool) -> bool:
+        """
+        Determine if a captured artifact should be retained based on the capture mode.
+
+        :param capture_mode: The mode specifying when to retain the artifact.
+        :param is_failed: Whether the scenario or step has failed.
+        :return: True if the artifact should be retained, False otherwise.
+        """
         if capture_mode in (CaptureMode.ALWAYS, CaptureMode.ON_RESCHEDULE):
             return True
         elif capture_mode == CaptureMode.ON_FAILURE and is_failed:
@@ -185,6 +238,13 @@ class PlaywrightPlugin(Plugin):
             return False
 
     async def on_step_end(self, event: Union[StepPassedEvent, StepFailedEvent]) -> None:
+        """
+        Handle the event when a step completes execution.
+
+        Captures screenshots of the current state of the browser, if configured.
+
+        :param event: The StepPassedEvent or StepFailedEvent instance.
+        """
         if self._runtime_config.should_capture_screenshots:
             for context in self._runtime_config.get_browser_contexts():
                 for page in context.pages:
@@ -196,6 +256,13 @@ class PlaywrightPlugin(Plugin):
 
     async def on_scenario_end(self,
                               event: Union[ScenarioPassedEvent, ScenarioFailedEvent]) -> None:
+        """
+        Handle the event when a scenario completes execution.
+
+        Attaches any captured artifacts (trace, video, screenshots) to the scenario result.
+
+        :param event: The ScenarioPassedEvent or ScenarioFailedEvent instance.
+        """
         is_failed = isinstance(event, ScenarioFailedEvent)
 
         if self._captured_trace:
@@ -223,6 +290,12 @@ class PlaywrightPlugin(Plugin):
                 screenshot.unlink(missing_ok=True)
 
     def _find_file(self, directory: Union[Path, None]) -> Union[Path, None]:
+        """
+        Find the first file in the given directory.
+
+        :param directory: The directory to search for files.
+        :return: The Path to the first file, or None if no files are found.
+        """
         if directory and directory.is_dir():
             for file in directory.iterdir():
                 if file.is_file():
@@ -230,19 +303,41 @@ class PlaywrightPlugin(Plugin):
         return None
 
     def _create_trace_artifact(self, trace_path: Path) -> FileArtifact:
+        """
+        Create a FileArtifact for a captured trace.
+
+        :param trace_path: The Path to the trace file.
+        :return: A FileArtifact representing the trace.
+        """
         return FileArtifact(trace_path.name, "application/zip", trace_path)
 
     def _create_video_artifact(self, video_path: Path) -> FileArtifact:
+        """
+        Create a FileArtifact for a captured video.
+
+        :param video_path: The Path to the video file.
+        :return: A FileArtifact representing the video.
+        """
         return FileArtifact(f"pw_video_{video_path.name}", "video/webm", video_path)
 
     def _create_screenshot_artifact(self, screenshot_path: Path) -> FileArtifact:
-        return FileArtifact(screenshot_path.name, "image/png", screenshot_path)
+        """
+        Create a FileArtifact for a captured screenshot.
 
-    def on_cleanup(self, event: CleanupEvent) -> None:
-        pass
+        :param screenshot_path: The Path to the screenshot file.
+        :return: A FileArtifact representing the screenshot.
+        """
+        return FileArtifact(screenshot_path.name, "image/png", screenshot_path)
 
 
 class Playwright(PluginConfig):
+    """
+    Configuration class for the PlaywrightPlugin.
+
+    Provides default settings for browser automation, including browser type,
+    device emulation, trace capturing, video recording, and screenshot capturing.
+    """
+
     plugin = PlaywrightPlugin
     description = ("Integrates Playwright for automated browser testing "
                    "with customizable configuration options")
@@ -268,6 +363,23 @@ class Playwright(PluginConfig):
     # Docs https://playwright.dev/python/docs/trace-viewer-intro
     capture_trace: CaptureMode = CaptureMode.NEVER
 
+    # Used in context.set_default_timeout(timeout)
+    # This setting will change the default maximum time for all the methods
+    # accepting `timeout` option.
     timeout: Union[int, None] = None
+
+    # Used in context.set_default_navigation_timeout(navigation_timeout)
+    # This setting will change the default maximum navigation time for the following methods
+    # and related shortcuts:
+    #         - `page.go_back()`
+    #         - `page.go_forward()`
+    #         - `page.goto()`
+    #         - `page.reload()`
+    #         - `page.set_content()`
+    #         - `page.expect_navigation()`
     navigation_timeout: Union[int, None] = None
+
+    # Used in browser_type.launch(timeout=timeout)
+    # Maximum time in milliseconds to wait for the browser instance to start.
+    # Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
     browser_timeout: Union[int, None] = None

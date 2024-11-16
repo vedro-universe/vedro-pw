@@ -11,14 +11,37 @@ __all__ = ("ConfigurableBrowser",)
 
 
 class ConfigurableBrowser(Browser):
+    """
+    Extends the Playwright `Browser` to provide configurable options and runtime integration.
+
+    This class integrates device options and runtime configurations, such as timeouts,
+    video recording, and tracing, into the creation of browser contexts and pages.
+    """
+
     def __init__(self, impl_obj: Browser, *,
                  device_options: Optional[DeviceOptions] = None,
                  runtime_config: RuntimeConfig = _runtime_config) -> None:
+        """
+        Initialize the ConfigurableBrowser.
+
+        :param impl_obj: The underlying Playwright `Browser` instance.
+        :param device_options: Optional device-specific options for emulation.
+        :param runtime_config: The runtime configuration for the browser.
+        """
         super().__init__(impl_obj._impl_obj)
         self._runtime_config = runtime_config
         self._device_options = device_options or {}
 
     async def new_context(self, **kwargs: Any) -> BrowserContext:
+        """
+        Create a new browser context with integrated runtime configurations.
+
+        This method applies device options, runtime settings, and captures
+        artifacts such as videos or traces if configured.
+
+        :param kwargs: Additional options to override or extend the context settings.
+        :return: A new `BrowserContext` instance with the configured options.
+        """
         options = {
             **self._device_options,
             **kwargs
@@ -50,5 +73,13 @@ class ConfigurableBrowser(Browser):
         return context
 
     async def new_page(self, **kwargs: Any) -> Page:
+        """
+        Create a new browser page within a newly created context.
+
+        This method creates a new context and opens a single page within it.
+
+        :param kwargs: Additional options to override or extend the context settings.
+        :return: A new `Page` instance within the created context.
+        """
         context = await self.new_context(**kwargs)
         return await context.new_page()
