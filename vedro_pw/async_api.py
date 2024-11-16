@@ -17,6 +17,26 @@ __all__ = ("launched_browser", "launched_local_browser", "launched_remote_browse
 
 
 @vedro.context
+async def launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]] = None,
+                           device_name: Optional[str] = None,
+                           *,
+                           auto_close: bool = True,
+                           playwright: Optional[AsyncPlaywright] = None,
+                           options: Optional[Union[LaunchOptions, ConnectOptions]] = None,
+                           ) -> ConfigurableBrowser:
+    if _runtime_config.remote:
+        return await launched_remote_browser(browser_name, device_name,
+                                             auto_close=auto_close,
+                                             playwright=playwright,
+                                             connect_options=cast(ConnectOptions, options))
+    else:
+        return await launched_local_browser(browser_name, device_name,
+                                            auto_close=auto_close,
+                                            playwright=playwright,
+                                            launch_options=cast(LaunchOptions, options))
+
+
+@vedro.context
 async def launched_local_browser(browser_name: Optional[Union[PlaywrightBrowser, str]] = None,
                                  device_name: Optional[str] = None,
                                  *,
@@ -74,26 +94,6 @@ async def launched_remote_browser(browser_name: Optional[Union[PlaywrightBrowser
 
     device_options = get_device_options(playwright, device_name or _runtime_config.device_name)
     return ConfigurableBrowser(browser_instance, device_options=device_options)
-
-
-@vedro.context
-async def launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]] = None,
-                           device_name: Optional[str] = None,
-                           *,
-                           auto_close: bool = True,
-                           playwright: Optional[AsyncPlaywright] = None,
-                           options: Optional[Union[LaunchOptions, ConnectOptions]] = None,
-                           ) -> ConfigurableBrowser:
-    if _runtime_config.remote:
-        return await launched_remote_browser(browser_name, device_name,
-                                             auto_close=auto_close,
-                                             playwright=playwright,
-                                             connect_options=cast(ConnectOptions, options))
-    else:
-        return await launched_local_browser(browser_name, device_name,
-                                            auto_close=auto_close,
-                                            playwright=playwright,
-                                            launch_options=cast(LaunchOptions, options))
 
 
 @vedro.context

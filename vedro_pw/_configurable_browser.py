@@ -1,6 +1,6 @@
 from typing import Any, Optional
 
-from playwright.async_api import Browser, BrowserContext
+from playwright.async_api import Browser, BrowserContext, Page
 from vedro import defer
 
 from ._runtime_config import RuntimeConfig
@@ -48,3 +48,7 @@ class ConfigurableBrowser(Browser):
         self._runtime_config.add_browser_context(context)
 
         return context
+
+    async def new_page(self, **kwargs: Any) -> Page:
+        context = await self.new_context(**kwargs)
+        return await context.new_page()
