@@ -3,7 +3,8 @@ from typing import Dict, Literal, Sequence, TypedDict, Union
 
 from playwright.async_api import FloatRect, Locator, ProxySettings, ViewportSize
 
-__all__ = ("LaunchOptions", "DeviceOptions", "TraceOptions", "VideoOptions", "ScreenshotOptions",)
+__all__ = ("LaunchOptions", "ConnectOptions", "DeviceOptions",
+           "TraceOptions", "VideoOptions", "ScreenshotOptions",)
 
 
 class LaunchOptions(TypedDict, total=False):
@@ -63,6 +64,29 @@ class LaunchOptions(TypedDict, total=False):
 
     firefox_user_prefs: Dict[str, Union[str, float, bool]]
     """Custom Firefox user preferences."""
+
+
+class ConnectOptions(TypedDict, total=False):
+    """
+    Represents the options for connecting to an existing browser instance.
+
+    Defines all configurable parameters for the `connect` method of the `BrowserType` class.
+    """
+
+    ws_endpoint: str
+    """A browser websocket endpoint to connect to."""
+
+    timeout: float
+    """Maximum time in milliseconds to wait for the connection to be established."""
+
+    slow_mo: float
+    """Slows down Playwright operations by the specified amount of milliseconds."""
+
+    headers: Dict[str, str]
+    """Additional HTTP headers to be sent with the web socket connect request."""
+
+    expose_network: str
+    """Defines network rules to expose from the client to the connected browser."""
 
 
 class DeviceOptions(TypedDict, total=False):
