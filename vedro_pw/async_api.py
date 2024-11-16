@@ -28,12 +28,12 @@ async def launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]]
         return await launched_remote_browser(browser_name, device_name,
                                              auto_close=auto_close,
                                              playwright=playwright,
-                                             connect_options=cast(ConnectOptions, options))
+                                             options=cast(ConnectOptions, options))
     else:
         return await launched_local_browser(browser_name, device_name,
                                             auto_close=auto_close,
                                             playwright=playwright,
-                                            launch_options=cast(LaunchOptions, options))
+                                            options=cast(LaunchOptions, options))
 
 
 @vedro.context
@@ -42,24 +42,23 @@ async def launched_local_browser(browser_name: Optional[Union[PlaywrightBrowser,
                                  *,
                                  auto_close: bool = True,
                                  playwright: Optional[AsyncPlaywright] = None,
-                                 launch_options: Optional[LaunchOptions] = None
-                                 ) -> ConfigurableBrowser:
+                                 options: Optional[LaunchOptions] = None) -> ConfigurableBrowser:
     if playwright is None:
         playwright = await _get_playwright_instance()
 
-    if launch_options is None:
-        launch_options = {}
+    if options is None:
+        options = {}
 
-    options: LaunchOptions = {
-        **launch_options,
-        "headless": launch_options.get("headless", not _runtime_config.headed),
-        "slow_mo": launch_options.get("slow_mo", _runtime_config.slowmo),
+    launch_options: LaunchOptions = {
+        **options,
+        "headless": options.get("headless", not _runtime_config.headed),
+        "slow_mo": options.get("slow_mo", _runtime_config.slowmo),
     }
-    if timeout := launch_options.get("timeout", _runtime_config.browser_timeout):
-        options["timeout"] = timeout
+    if timeout := options.get("timeout", _runtime_config.browser_timeout):
+        launch_options["timeout"] = timeout
 
     browser_type = get_browser_type(playwright, browser_name or _runtime_config.browser_name)
-    browser_instance = await browser_type.launch(**options)
+    browser_instance = await browser_type.launch(**launch_options)
     if auto_close:
         defer(browser_instance.close)
 
@@ -73,22 +72,21 @@ async def launched_remote_browser(browser_name: Optional[Union[PlaywrightBrowser
                                   *,
                                   auto_close: bool = True,
                                   playwright: Optional[AsyncPlaywright] = None,
-                                  connect_options: Optional[ConnectOptions] = None
-                                  ) -> ConfigurableBrowser:
+                                  options: Optional[ConnectOptions] = None) -> ConfigurableBrowser:
     if playwright is None:
         playwright = await _get_playwright_instance(auto_close=auto_close)
 
-    if connect_options is None:
-        connect_options = {}
+    if options is None:
+        options = {}
 
-    options: ConnectOptions = {
-        **connect_options,
-        "ws_endpoint": connect_options.get("ws_endpoint", _runtime_config.remote_endpoint),
-        "slow_mo": connect_options.get("slow_mo", _runtime_config.slowmo),
+    connect_options: ConnectOptions = {
+        **options,
+        "ws_endpoint": options.get("ws_endpoint", _runtime_config.remote_endpoint),
+        "slow_mo": options.get("slow_mo", _runtime_config.slowmo),
     }
 
     browser_type = get_browser_type(playwright, browser_name or _runtime_config.browser_name)
-    browser_instance = await browser_type.connect(**options)
+    browser_instance = await browser_type.connect(**connect_options)
     if auto_close:
         defer(browser_instance.close)
 
