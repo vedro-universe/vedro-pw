@@ -9,6 +9,7 @@ from vedro import defer
 from ._configurable_browser import ConfigurableBrowser
 from ._pw_browser import PlaywrightBrowser
 from ._runtime_config import runtime_config as _runtime_config
+from ._types import LaunchOptions
 from ._utils import get_browser_type, get_device_options
 
 __all__ = ("launched_browser", "launched_local_browser", "launched_remote_browser",
@@ -21,16 +22,21 @@ async def launched_local_browser(browser_name: Optional[Union[PlaywrightBrowser,
                                  *,
                                  auto_close: bool = True,
                                  playwright: Optional[AsyncPlaywright] = None,
-                                 **kwargs: Any) -> ConfigurableBrowser:
+                                 launch_options: Optional[LaunchOptions] = None
+                                 ) -> ConfigurableBrowser:
     if playwright is None:
         playwright = await _get_playwright_instance()
 
-    options = {
-        **kwargs,
-        "headless": kwargs.get("headless", not _runtime_config.headed),
-        "slow_mo": kwargs.get("slow_mo", _runtime_config.slowmo),
-        "timeout": kwargs.get("timeout", _runtime_config.browser_timeout),
-    }
+    if launch_options is None:
+        launch_options = {}
+
+    options: LaunchOptions = {**launch_options}
+    if headless := launch_options.get("headless", not _runtime_config.headed):
+        options["headless"] = headless
+    if slow_mo := launch_options.get("slow_mo", _runtime_config.slowmo):
+        options["slow_mo"] = slow_mo
+    if timeout := launch_options.get("timeout", _runtime_config.browser_timeout):
+        options["timeout"] = timeout
 
     browser_type = get_browser_type(playwright, browser_name or _runtime_config.browser_name)
     browser_instance = await browser_type.launch(**options)

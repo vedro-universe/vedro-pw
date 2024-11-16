@@ -1,9 +1,68 @@
 from pathlib import Path
-from typing import Literal, Sequence, TypedDict, Union
+from typing import Dict, Literal, Sequence, TypedDict, Union
 
-from playwright.async_api import FloatRect, Locator, ViewportSize
+from playwright.async_api import FloatRect, Locator, ProxySettings, ViewportSize
 
-__all__ = ("DeviceOptions", "TraceOptions", "VideoOptions", "ScreenshotOptions",)
+__all__ = ("LaunchOptions", "DeviceOptions", "TraceOptions", "VideoOptions", "ScreenshotOptions",)
+
+
+class LaunchOptions(TypedDict, total=False):
+    """
+    Represents the options for launching a browser instance.
+
+    Defines all configurable parameters for the `launch` method of the `BrowserType` class.
+    """
+
+    executable_path: Union[str, Path]
+    """Path to a browser executable to run instead of the bundled one."""
+
+    channel: str
+    """Browser distribution channel. Supported values include 'chrome', 'msedge', etc."""
+
+    args: Sequence[str]
+    """Additional arguments to pass to the browser instance."""
+
+    ignore_default_args: Union[bool, Sequence[str]]
+    """If `True`, disables Playwright's default browser arguments."""
+
+    handle_sigint: bool
+    """Close the browser process on Ctrl-C."""
+
+    handle_sigterm: bool
+    """Close the browser process on SIGTERM."""
+
+    handle_sighup: bool
+    """Close the browser process on SIGHUP."""
+
+    timeout: float
+    """Maximum time in milliseconds to wait for the browser instance to start."""
+
+    env: Dict[str, Union[str, float, bool]]
+    """Environment variables to be visible to the browser."""
+
+    headless: bool
+    """Run the browser in headless mode."""
+
+    devtools: bool
+    """Auto-open a Developer Tools panel for each tab (Chromium-only)."""
+
+    proxy: ProxySettings
+    """Network proxy settings."""
+
+    downloads_path: Union[str, Path]
+    """Path where accepted downloads are stored."""
+
+    slow_mo: float
+    """Slows down Playwright operations by the specified milliseconds."""
+
+    traces_dir: Union[str, Path]
+    """Path to save browser traces."""
+
+    chromium_sandbox: bool
+    """Enable or disable Chromium sandboxing."""
+
+    firefox_user_prefs: Dict[str, Union[str, float, bool]]
+    """Custom Firefox user preferences."""
 
 
 class DeviceOptions(TypedDict, total=False):
