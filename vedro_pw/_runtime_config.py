@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from ._pw_browser import PlaywrightBrowser
-from ._types import ScreenshotOptions, TraceOptions, VideoOptions
+from .options import ScreenshotOptions, TraceOptions, VideoOptions
 
 __all__ = ("RuntimeConfig", "runtime_config",)
 

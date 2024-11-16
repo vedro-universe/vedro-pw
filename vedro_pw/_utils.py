@@ -5,7 +5,7 @@ from playwright.async_api import BrowserType
 from playwright.async_api import Playwright as AsyncPlaywright
 
 from ._pw_browser import PlaywrightBrowser
-from ._types import DeviceOptions
+from .options import DeviceOptions
 
 __all__ = ("get_browser_type", "get_device_options",)
 

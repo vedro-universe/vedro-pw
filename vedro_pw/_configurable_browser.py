@@ -5,7 +5,7 @@ from vedro import defer
 
 from ._runtime_config import RuntimeConfig
 from ._runtime_config import runtime_config as _runtime_config
-from ._types import DeviceOptions
+from .options import DeviceOptions
 
 __all__ = ("ConfigurableBrowser",)
 

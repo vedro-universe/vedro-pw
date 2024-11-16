@@ -9,8 +9,8 @@ from vedro import defer
 from ._configurable_browser import ConfigurableBrowser
 from ._pw_browser import PlaywrightBrowser
 from ._runtime_config import runtime_config as _runtime_config
-from ._types import ConnectOptions, LaunchOptions, NewContextOptions
 from ._utils import get_browser_type, get_device_options
+from .options import ConnectOptions, LaunchOptions, NewContextOptions
 
 __all__ = ("launched_browser", "launched_local_browser", "launched_remote_browser",
            "created_browser_context", "opened_browser_page",)
