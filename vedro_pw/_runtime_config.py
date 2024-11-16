@@ -133,12 +133,6 @@ class RuntimeConfig:
     def set_device(self, value: str) -> None:
         self._device = value
 
-    def get_device_options(self) -> Dict[str, Any]:
-        return self._device_options
-
-    def set_device_options(self, options: Dict[str, Any]) -> None:
-        self._device_options = options
-
     # Timeouts
 
     def set_timeout(self, value: int) -> None:

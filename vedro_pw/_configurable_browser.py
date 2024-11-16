@@ -1,23 +1,26 @@
-from typing import Any
+from typing import Any, Optional
 
 from playwright.async_api import Browser, BrowserContext
 from vedro import defer
 
 from ._runtime_config import RuntimeConfig
 from ._runtime_config import runtime_config as _runtime_config
+from ._types import DeviceOptions
 
 __all__ = ("ConfigurableBrowser",)
 
 
 class ConfigurableBrowser(Browser):
     def __init__(self, impl_obj: Browser, *,
+                 device_options: Optional[DeviceOptions] = None,
                  runtime_config: RuntimeConfig = _runtime_config) -> None:
         super().__init__(impl_obj._impl_obj)
         self._runtime_config = runtime_config
+        self._device_options = device_options or {}
 
     async def new_context(self, **kwargs: Any) -> BrowserContext:
         options = {
-            **_runtime_config.get_device_options(),
+            **self._device_options,
             **kwargs
         }
 

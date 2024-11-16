@@ -9,7 +9,7 @@ from vedro import defer
 from ._configurable_browser import ConfigurableBrowser
 from ._pw_browser import PlaywrightBrowser
 from ._runtime_config import runtime_config as _runtime_config
-from ._utils import get_browser_type
+from ._utils import get_browser_type, get_device_options
 
 __all__ = ("launched_browser", "launched_local_browser", "launched_remote_browser",
            "created_browser_context", "opened_browser_page",)
@@ -17,6 +17,7 @@ __all__ = ("launched_browser", "launched_local_browser", "launched_remote_browse
 
 @vedro.context
 async def launched_local_browser(browser_name: Optional[Union[PlaywrightBrowser, str]] = None,
+                                 device_name: Optional[str] = None,
                                  *,
                                  auto_close: bool = True,
                                  playwright: Optional[AsyncPlaywright] = None,
@@ -31,22 +32,18 @@ async def launched_local_browser(browser_name: Optional[Union[PlaywrightBrowser,
         "timeout": kwargs.get("timeout", _runtime_config.get_browser_timeout()),
     }
 
-    if device_name := _runtime_config.get_device():
-        device_options = playwright.devices.get(device_name)
-        if device_options is None:
-            raise ValueError(f"Device '{device_name}' is not supported or does not exist")
-        _runtime_config.set_device_options(device_options)
-
     browser_type = get_browser_type(playwright, browser_name or _runtime_config.get_browser())
     browser_instance = await browser_type.launch(**options)
     if auto_close:
         defer(browser_instance.close)
 
-    return ConfigurableBrowser(browser_instance)
+    device_options = get_device_options(playwright, device_name or _runtime_config.get_device())
+    return ConfigurableBrowser(browser_instance, device_options=device_options)
 
 
 @vedro.context
 async def launched_remote_browser(browser_name: Optional[Union[PlaywrightBrowser, str]] = None,
+                                  device_name: Optional[str] = None,
                                   *,
                                   auto_close: bool = True,
                                   playwright: Optional[AsyncPlaywright] = None,
@@ -60,33 +57,29 @@ async def launched_remote_browser(browser_name: Optional[Union[PlaywrightBrowser
         "slow_mo": kwargs.get("slow_mo", _runtime_config.get_slowmo()),
     }
 
-    if device_name := _runtime_config.get_device():
-        device_options = playwright.devices.get(device_name)
-        if device_options is None:
-            raise ValueError(f"Device '{device_name}' is not supported or does not exist")
-        _runtime_config.set_device_options(device_options)
-
     browser_type = get_browser_type(playwright, browser_name or _runtime_config.get_browser())
     browser_instance = await browser_type.connect(**options)
     if auto_close:
         defer(browser_instance.close)
 
-    return ConfigurableBrowser(browser_instance)
+    device_options = get_device_options(playwright, device_name or _runtime_config.get_device())
+    return ConfigurableBrowser(browser_instance, device_options=device_options)
 
 
 @vedro.context
 async def launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]] = None,
+                           device_name: Optional[str] = None,
                            *,
                            auto_close: bool = True,
                            playwright: Optional[AsyncPlaywright] = None,
                            **kwargs: Any) -> ConfigurableBrowser:
     if _runtime_config.is_remote():
-        return await launched_remote_browser(browser_name,
+        return await launched_remote_browser(browser_name, device_name,
                                              auto_close=auto_close,
                                              playwright=playwright,
                                              **kwargs)
     else:
-        return await launched_local_browser(browser_name,
+        return await launched_local_browser(browser_name, device_name,
                                             auto_close=auto_close,
                                             playwright=playwright,
                                             **kwargs)
