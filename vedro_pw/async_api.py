@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union, cast
+from typing import Optional, Union, cast
 
 import vedro
 from playwright.async_api import Browser, BrowserContext, Page
@@ -9,7 +9,7 @@ from vedro import defer
 from ._configurable_browser import ConfigurableBrowser
 from ._pw_browser import PlaywrightBrowser
 from ._runtime_config import runtime_config as _runtime_config
-from ._types import ConnectOptions, LaunchOptions
+from ._types import ConnectOptions, LaunchOptions, NewContextOptions
 from ._utils import get_browser_type, get_device_options
 
 __all__ = ("launched_browser", "launched_local_browser", "launched_remote_browser",
@@ -98,11 +98,13 @@ async def launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]]
 
 @vedro.context
 async def created_browser_context(browser: Optional[Browser] = None,
-                                  **kwargs: Any) -> BrowserContext:
+                                  options: Optional[NewContextOptions] = None) -> BrowserContext:
     if browser is None:
         browser = await launched_browser()
 
-    options = {**kwargs}
+    if options is None:
+        options = {}
+
     context = await browser.new_context(**options)
 
     # ConfigurableBrowser uses `defer(context.close)` to close the context gracefully,

@@ -1,9 +1,18 @@
 from pathlib import Path
-from typing import Dict, Literal, Sequence, TypedDict, Union
+from typing import Dict, List, Literal, Pattern, Sequence, TypedDict, Union
 
-from playwright.async_api import FloatRect, Locator, ProxySettings, ViewportSize
+from playwright._impl._api_structures import ClientCertificate
+from playwright.async_api import (
+    FloatRect,
+    Geolocation,
+    HttpCredentials,
+    Locator,
+    ProxySettings,
+    StorageState,
+    ViewportSize,
+)
 
-__all__ = ("LaunchOptions", "ConnectOptions", "DeviceOptions",
+__all__ = ("LaunchOptions", "ConnectOptions", "NewContextOptions", "DeviceOptions",
            "TraceOptions", "VideoOptions", "ScreenshotOptions",)
 
 
@@ -87,6 +96,121 @@ class ConnectOptions(TypedDict, total=False):
 
     expose_network: str
     """Defines network rules to expose from the client to the connected browser."""
+
+
+class NewContextOptions(TypedDict, total=False):
+    """
+    Represents the options for creating a new browser context.
+
+    Defines all configurable parameters for the `new_context` method of the `Browser` class.
+    """
+
+    viewport: ViewportSize
+    """
+    Sets a consistent viewport for each page. Defaults to 1280x720 if not disabled by `no_viewport`
+    """
+
+    screen: ViewportSize
+    """Emulates consistent window screen size available inside web pages."""
+
+    no_viewport: bool
+    """Disables fixed viewport, allowing window resizing in headed mode."""
+
+    ignore_https_errors: bool
+    """Specifies whether to ignore HTTPS errors when sending network requests."""
+
+    java_script_enabled: bool
+    """Specifies whether JavaScript should be enabled. Defaults to `true`."""
+
+    bypass_csp: bool
+    """Enables bypassing of page's Content-Security-Policy."""
+
+    user_agent: str
+    """Specifies the user agent string to use in this context."""
+
+    locale: str
+    """Specifies the user locale, affecting `navigator.language` and date/number formatting."""
+
+    timezone_id: str
+    """Specifies the timezone for the context."""
+
+    geolocation: Geolocation
+    """Sets geolocation for the context."""
+
+    permissions: Sequence[str]
+    """List of permissions to grant to all pages in the context."""
+
+    extra_http_headers: Dict[str, str]
+    """Additional HTTP headers sent with every request in the context."""
+
+    offline: bool
+    """Emulates offline network conditions."""
+
+    http_credentials: HttpCredentials
+    """Credentials for HTTP authentication."""
+
+    device_scale_factor: float
+    """Specifies the device scale factor (similar to DPR)."""
+
+    is_mobile: bool
+    """Specifies if the context should emulate a mobile device."""
+
+    has_touch: bool
+    """Specifies whether the viewport should support touch events."""
+
+    color_scheme: Literal["dark", "light", "no-preference", "null"]
+    """Emulates the `prefers-color-scheme` media feature."""
+
+    reduced_motion: Literal["no-preference", "null", "reduce"]
+    """Emulates the `prefers-reduced-motion` media feature."""
+
+    forced_colors: Literal["active", "none", "null"]
+    """Emulates the `forced-colors` media feature."""
+
+    accept_downloads: bool
+    """Automatically accepts all downloads in the context."""
+
+    default_browser_type: str
+    """Specifies the default browser type for the context."""
+
+    proxy: ProxySettings
+    """Configures network proxy settings."""
+
+    record_har_path: Union[str, Path]
+    """Specifies the file path to save HAR recordings."""
+
+    record_har_omit_content: bool
+    """Controls whether to omit request content from HAR recordings."""
+
+    record_video_dir: Union[str, Path]
+    """Specifies the directory to save recorded videos."""
+
+    record_video_size: ViewportSize
+    """Specifies the dimensions of recorded videos."""
+
+    storage_state: Union[StorageState, str, Path]
+    """Populates the context with given storage state (e.g., cookies and localStorage)."""
+
+    base_url: str
+    """Specifies the base URL for relative navigations."""
+
+    strict_selectors: bool
+    """Enables strict selectors mode for this context."""
+
+    service_workers: Literal["allow", "block"]
+    """Controls whether service workers can be registered."""
+
+    record_har_url_filter: Union[str, Pattern[str]]
+    """Specifies a URL filter for HAR recordings."""
+
+    record_har_mode: Literal["full", "minimal"]
+    """Controls the level of detail recorded in HAR files."""
+
+    record_har_content: Literal["attach", "embed", "omit"]
+    """Specifies how to handle resource content in HAR files."""
+
+    client_certificates: List[ClientCertificate]
+    """Configures TLS client certificates for the context."""
 
 
 class DeviceOptions(TypedDict, total=False):
