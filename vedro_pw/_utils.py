@@ -29,5 +29,9 @@ def get_device_options(playwright: AsyncPlaywright,
 
     device_options = playwright.devices.get(device_name)
     if device_options is None:
-        raise ValueError(f"Device '{device_name}' is not supported or does not exist")
+        raise ValueError(
+            f"Device '{device_name}' is not supported or does not exist. "
+            "Please refer to the list of supported devices here: "
+            "https://github.com/microsoft/playwright/blob/main/packages/playwright-core/src/server/deviceDescriptorsSource.json"  # noqa
+        )
     return cast(DeviceOptions, device_options)
