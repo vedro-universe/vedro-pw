@@ -8,5 +8,7 @@ class PlaywrightBrowser(str, Enum):
     CHROMIUM = "chromium"
     WEBKIT = "webkit"
 
+    RANDOM = "random"
+
     def __str__(self) -> str:
         return self.value

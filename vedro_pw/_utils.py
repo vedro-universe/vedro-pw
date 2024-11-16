@@ -1,3 +1,4 @@
+from random import choice
 from typing import Union, cast
 
 from playwright.async_api import BrowserType
@@ -11,10 +12,14 @@ __all__ = ("get_browser_type", "get_device_options",)
 
 def get_browser_type(playwright: AsyncPlaywright,
                      browser_name: Union[PlaywrightBrowser, str]) -> BrowserType:
-    return cast(BrowserType, getattr(
-        playwright,
-        browser_name.value if isinstance(browser_name, PlaywrightBrowser) else browser_name
-    ))
+    if isinstance(browser_name, PlaywrightBrowser):
+        browser_name = browser_name.value
+
+    if browser_name == PlaywrightBrowser.RANDOM:
+        browser_name = choice([x.value for x in PlaywrightBrowser
+                               if x != PlaywrightBrowser.RANDOM])
+
+    return cast(BrowserType, getattr(playwright, browser_name))
 
 
 def get_device_options(playwright: AsyncPlaywright,
