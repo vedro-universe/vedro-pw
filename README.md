@@ -97,6 +97,7 @@ The plugin adds several command-line arguments for flexibility:
 | `--pw-trace`           | Trace recording (`always`, `on-failure`, `on-reschedule`, `never`)      | `never`               |
 | `--pw-device`          | Emulate a specific device                                               | `None`                |
 | `--pw-debug`           | Enable Playwright debug mode by setting `PWDEBUG=1`                     | `False`               |
+| `--pw-open-last-trace` | Open the last captured Playwright trace after the test run              | `False`               |
 
 ### Example Usage
 
