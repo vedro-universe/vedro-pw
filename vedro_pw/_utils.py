@@ -1,3 +1,4 @@
+from pathlib import Path
 from random import choice
 from typing import Union, cast
 
@@ -7,7 +8,7 @@ from playwright.async_api import Playwright as AsyncPlaywright
 from ._pw_browser import PlaywrightBrowser
 from .options import DeviceOptions
 
-__all__ = ("get_browser_type", "get_device_options",)
+__all__ = ("get_browser_type", "get_device_options", "show_pw_trace",)
 
 
 def get_browser_type(playwright: AsyncPlaywright,
@@ -61,3 +62,22 @@ def get_device_options(playwright: AsyncPlaywright,
             "https://github.com/microsoft/playwright/blob/main/packages/playwright-core/src/server/deviceDescriptorsSource.json"  # noqa
         )
     return cast(DeviceOptions, device_options)
+
+
+def show_pw_trace(path: Path) -> None:
+    """
+    Open the Playwright trace viewer for the specified trace file.
+
+    This function launches a subprocess to open the Playwright trace viewer
+    for analyzing the specified trace file. The viewer runs as a separate
+    process, and this function does not block execution.
+
+    :param path: The file path to the trace file to be opened.
+    """
+    import subprocess
+    subprocess.Popen(
+        args=["playwright", "show-trace", str(path)],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True
+    )

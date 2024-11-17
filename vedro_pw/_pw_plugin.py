@@ -7,6 +7,7 @@ from vedro.core import Dispatcher, Plugin, PluginConfig
 from vedro.events import (
     ArgParsedEvent,
     ArgParseEvent,
+    CleanupEvent,
     ScenarioFailedEvent,
     ScenarioPassedEvent,
     ScenarioRunEvent,
@@ -18,6 +19,7 @@ from ._capture_mode import CaptureMode
 from ._pw_browser import PlaywrightBrowser
 from ._runtime_config import RuntimeConfig
 from ._runtime_config import runtime_config as _runtime_config
+from ._utils import show_pw_trace
 
 __all__ = ("Playwright", "PlaywrightPlugin",)
 
@@ -52,6 +54,7 @@ class PlaywrightPlugin(Plugin):
         self._capture_screenshots: CaptureMode = config.capture_screenshots
         self._capture_video: CaptureMode = config.capture_video
         self._capture_trace: CaptureMode = config.capture_trace
+        self._open_last_trace: bool = False
 
         self._timeout: Union[int, None] = config.timeout
         self._navigation_timeout: Union[int, None] = config.navigation_timeout
@@ -74,7 +77,8 @@ class PlaywrightPlugin(Plugin):
                   .listen(StepPassedEvent, self.on_step_end) \
                   .listen(StepFailedEvent, self.on_step_end) \
                   .listen(ScenarioPassedEvent, self.on_scenario_end) \
-                  .listen(ScenarioFailedEvent, self.on_scenario_end)
+                  .listen(ScenarioFailedEvent, self.on_scenario_end) \
+                  .listen(CleanupEvent, self.on_cleanup)
 
     def on_arg_parse(self, event: ArgParseEvent) -> None:
         """
@@ -129,6 +133,10 @@ class PlaywrightPlugin(Plugin):
         group.add_argument("--pw-debug", action="store_true", default=False,
                            help="Enable Playwright debug mode by setting PWDEBUG=1")
 
+        group.add_argument("--pw-open-last-trace", action="store_true",
+                           default=self._open_last_trace,
+                           help="Open the most recent Playwright trace (if available)")
+
     def on_arg_parsed(self, event: ArgParsedEvent) -> None:
         """
         Handle the event after command-line arguments have been parsed.
@@ -162,6 +170,8 @@ class PlaywrightPlugin(Plugin):
 
         if event.args.pw_debug:
             os.environ["PWDEBUG"] = "1"
+
+        self._open_last_trace = event.args.pw_open_last_trace
 
         if self._timeout is not None:
             self._runtime_config.timeout = self._timeout
@@ -328,6 +338,29 @@ class PlaywrightPlugin(Plugin):
         :return: A FileArtifact representing the screenshot.
         """
         return FileArtifact(screenshot_path.name, "image/png", screenshot_path)
+
+    def on_cleanup(self, event: CleanupEvent) -> None:
+        """
+        Handle the cleanup event to finalize the Playwright test session.
+
+        If the `--pw-open-last-trace` option is enabled and a trace was captured,
+        this method attempts to open the Playwright trace viewer for the last captured trace.
+
+        :param event: The CleanupEvent instance triggered during cleanup.
+        """
+        if not self._open_last_trace:
+            return
+
+        if self._captured_trace is None:
+            event.report.add_summary("No Playwright trace was captured")
+            return
+
+        try:
+            show_pw_trace(self._captured_trace)
+        except Exception as e:
+            event.report.add_summary(f"Failed to show Playwright trace: {e}")
+        else:
+            event.report.add_summary(f"Opened Playwright trace '{self._captured_trace}'")
 
 
 class Playwright(PluginConfig):
