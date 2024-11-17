@@ -168,6 +168,9 @@ class PlaywrightPlugin(Plugin):
         self._capture_video = event.args.pw_video
         self._capture_trace = event.args.pw_trace
 
+        if self._runtime_config.remote and self._capture_video != CaptureMode.NEVER:
+            print("Playwright cannot capture video when using a remote browser for some reason")
+
         if event.args.pw_debug:
             os.environ["PWDEBUG"] = "1"
 

@@ -1,7 +1,12 @@
 from pathlib import Path
-from typing import Dict, List, Literal, Pattern, Sequence, TypedDict, Union
+from typing import TYPE_CHECKING, Dict, List, Literal, Pattern, Sequence, TypedDict, Union
 
-from playwright._impl._api_structures import ClientCertificate
+if TYPE_CHECKING:
+    from playwright._impl._api_structures import ClientCertificate
+else:
+    from typing import Any
+    ClientCertificate = Any
+
 from playwright.async_api import (
     FloatRect,
     Geolocation,
