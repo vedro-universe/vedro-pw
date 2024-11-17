@@ -9,7 +9,7 @@ from .async_api import (
     opened_browser_page,
 )
 
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 __all__ = ("opened_browser_page", "created_browser_context", "launched_browser",
            "launched_local_browser", "launched_remote_browser",
            "Playwright", "PlaywrightPlugin", "PlaywrightBrowser", "CaptureMode",)
