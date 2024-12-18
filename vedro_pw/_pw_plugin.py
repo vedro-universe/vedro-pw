@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import Dict, Type, Union
 
+from playwright.async_api import Page
 from vedro import FileArtifact, create_tmp_dir, create_tmp_file
 from vedro.core import Dispatcher, Plugin, PluginConfig
 from vedro.events import (
@@ -258,14 +259,38 @@ class PlaywrightPlugin(Plugin):
 
         :param event: The StepPassedEvent or StepFailedEvent instance.
         """
-        if self._runtime_config.should_capture_screenshots:
-            for context in self._runtime_config.get_browser_contexts():
-                for page in context.pages:
-                    screenshot_number = len(self._captured_screenshots) + 1
-                    prefix = f"step{screenshot_number:02}_{event.step_result.step.name}_"
-                    screenshot_path = create_tmp_file(prefix=prefix, suffix=".png")
-                    await page.screenshot(path=screenshot_path)
-                    self._captured_screenshots[event.step_result.step.name] = screenshot_path
+        if not self._runtime_config.should_capture_screenshots:
+            return
+
+        step_name = event.step_result.step.name
+        for context in self._runtime_config.get_browser_contexts():
+            for page in context.pages:
+                try:
+                    screenshot_path = await self._capture_screenshot(page, step_name)
+                except Exception as e:
+                    event.step_result.add_extra_details(f"Failed to capture screenshot: {e!r}")
+                else:
+                    self._captured_screenshots[step_name] = screenshot_path
+
+    async def _capture_screenshot(self, page: Page, step_name: str) -> Path:
+        """
+        Capture a screenshot of the current browser page and save it to a temporary file.
+
+        This method generates a unique file name based on the step number and step name,
+        saves the screenshot to a temporary file, and returns the file path.
+
+        :param page: The Playwright `Page` instance to capture the screenshot from.
+        :param step_name: The name of the step, used in the screenshot file name.
+        :return: The path to the temporary file where the screenshot is saved.
+        :raises playwright.async_api.Error: If the screenshot capture fails.
+        """
+        screenshot_number = len(self._captured_screenshots) + 1
+        prefix = f"step{screenshot_number:02}_{step_name}_"
+        screenshot_path = create_tmp_file(prefix=prefix, suffix=".png")
+
+        await page.screenshot(path=screenshot_path)
+
+        return screenshot_path
 
     async def on_scenario_end(self,
                               event: Union[ScenarioPassedEvent, ScenarioFailedEvent]) -> None:
