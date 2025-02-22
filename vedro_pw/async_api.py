@@ -3,7 +3,8 @@ from typing import Any, Dict, Optional, Union, overload
 from playwright.async_api import Browser, BrowserContext, Page
 from playwright.async_api import Playwright as AsyncPlaywright
 from playwright.async_api import async_playwright
-from vedro import defer
+from vedro import defer, defer_global
+from vedro_shared_resource import shared_resource
 
 from ._configurable_browser import ConfigurableBrowser
 from ._pw_browser import PlaywrightBrowser
@@ -13,7 +14,7 @@ from ._utils import get_browser_type, get_device_options
 from .options import ConnectOptions, LaunchOptions, NewContextOptions
 
 __all__ = ("launched_browser", "launched_local_browser", "launched_remote_browser",
-           "created_browser_context", "opened_browser_page",)
+           "created_browser_context", "opened_browser_page", "shared_launched_browser",)
 
 
 @overload
@@ -207,4 +208,39 @@ async def _get_playwright_instance(*, auto_close: bool = True) -> AsyncPlaywrigh
     playwright = await playwright_manager.start()
     if auto_close:
         defer(playwright_manager.__aexit__)
+    return playwright
+
+
+@shared_resource(max_instances=32, type_sensitive=True)
+async def shared_launched_browser(browser_name: Optional[Union[PlaywrightBrowser, str]] = None,
+                                  device_name: Optional[str] = None,
+                                  **kwargs: Any) -> ConfigurableBrowser:
+    """
+    Provide a shared browser instance across multiple scenarios.
+
+    :param browser_name: The name of the browser to launch or connect to.
+    :param device_name: The name of the device to emulate.
+    :param kwargs: Additional options for the browser.
+    :return: A shared ConfigurableBrowser instance.
+    """
+    kwargs["playwright"] = await _get_shared_playwright()
+    kwargs["auto_close"] = False
+    browser = await launched_browser(browser_name, device_name, **kwargs)
+    defer_global(browser.close)
+    return browser
+
+
+@shared_resource(max_instances=1)
+async def _get_shared_playwright() -> AsyncPlaywright:
+    """
+    Provide a shared Playwright instance across multiple scenarios.
+
+    This function ensures that a single Playwright instance is shared across scenarios
+    to optimize resource usage. The instance is automatically closed when no longer needed.
+
+    :return: A shared AsyncPlaywright instance.
+    """
+    playwright_manager = async_playwright()
+    playwright = await playwright_manager.start()
+    defer_global(playwright_manager.__aexit__)
     return playwright
