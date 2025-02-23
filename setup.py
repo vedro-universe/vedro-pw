@@ -13,7 +13,7 @@ def find_dev_required():
 
 setup(
     name="vedro-pw",
-    version="0.2.1",
+    version="0.3.0",
     description=("Integrates Playwright for automated browser testing "
                  " with customizable configuration options"),
     long_description=open("README.md").read(),
