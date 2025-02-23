@@ -14,7 +14,8 @@ from ._utils import get_browser_type, get_device_options
 from .options import ConnectOptions, LaunchOptions, NewContextOptions
 
 __all__ = ("launched_browser", "launched_local_browser", "launched_remote_browser",
-           "created_browser_context", "opened_browser_page", "shared_launched_browser",)
+           "created_browser_context", "opened_browser_page", "shared_launched_browser",
+           "get_playwright_instance", "get_shared_playwright",)
 
 
 @overload
@@ -102,7 +103,7 @@ async def launched_local_browser(browser_name: Optional[Union[PlaywrightBrowser,
     :return: A ConfigurableBrowser instance.
     """
     if playwright is None:
-        playwright = await _get_playwright_instance()
+        playwright = await get_playwright_instance()
 
     options: Dict[str, Any] = {
         **kwargs,
@@ -138,7 +139,7 @@ async def launched_remote_browser(browser_name: Optional[Union[PlaywrightBrowser
     :return: A ConfigurableBrowser instance.
     """
     if playwright is None:
-        playwright = await _get_playwright_instance(auto_close=auto_close)
+        playwright = await get_playwright_instance(auto_close=auto_close)
 
     options: Dict[str, Any] = {
         **kwargs,
@@ -196,7 +197,7 @@ async def opened_browser_page(context: Optional[BrowserContext] = None) -> Page:
     return page
 
 
-async def _get_playwright_instance(*, auto_close: bool = True) -> AsyncPlaywright:
+async def get_playwright_instance(*, auto_close: bool = True) -> AsyncPlaywright:
     """
     Get a Playwright instance.
 
@@ -223,7 +224,7 @@ async def shared_launched_browser(browser_name: Optional[Union[PlaywrightBrowser
     :param kwargs: Additional options for the browser.
     :return: A shared ConfigurableBrowser instance.
     """
-    kwargs["playwright"] = await _get_shared_playwright()
+    kwargs["playwright"] = await get_shared_playwright()
     kwargs["auto_close"] = False
     browser = await launched_browser(browser_name, device_name, **kwargs)
     defer_global(browser.close)
@@ -231,7 +232,7 @@ async def shared_launched_browser(browser_name: Optional[Union[PlaywrightBrowser
 
 
 @shared_resource(max_instances=1)
-async def _get_shared_playwright() -> AsyncPlaywright:
+async def get_shared_playwright() -> AsyncPlaywright:
     """
     Provide a shared Playwright instance across multiple scenarios.
 
