@@ -65,7 +65,7 @@ Here's a simple Vedro scenario that opens the Playwright homepage and verifies t
 
 ```python
 import vedro
-from vedro_pw import opened_browser_page
+from vedro_pw import opened_browser_page, expect
 
 class Scenario(vedro.Scenario):
     subject = "Open Playwright homepage"
@@ -77,7 +77,7 @@ class Scenario(vedro.Scenario):
         await self.page.goto("https://playwright.dev/")
 
     async def then(self):
-        assert await self.page.title() == "Playwright"
+        assert await expect(self.page).to_have_title("Playwright")
 ```
 
 ## Command-Line Options
