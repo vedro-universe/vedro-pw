@@ -20,7 +20,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Nikita Tsvetkov",
     author_email="tsv1@fastmail.com",
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     url="https://github.com/vedro-universe/vedro-pw",
     project_urls={
         "Docs": "https://github.com/vedro-universe/vedro-pw",
@@ -33,7 +33,6 @@ setup(
     tests_require=find_dev_required(),
     classifiers=[
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
