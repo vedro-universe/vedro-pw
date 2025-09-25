@@ -102,7 +102,7 @@ The plugin adds several command-line arguments for flexibility:
 ### Example Usage
 
 ```shell
-$ vedro run --pw-browser=firefox --pw-headed --pw-screenshots=on-failure --save-artifacts
+$ vedro run --pw-browser=firefox --pw-headed --pw-screenshots=on-failure
 ```
 
 ### Capture Modes
