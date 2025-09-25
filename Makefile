@@ -17,11 +17,14 @@ publish:
 
 .PHONY: test
 test:
-	python3 -m pytest
+	python3 -m vedro run tests/
 
 .PHONY: coverage
 coverage:
-	python3 -m pytest --cov --cov-report=term --cov-report=xml:$(or $(COV_REPORT_DEST),coverage.xml)
+	python3 -m coverage erase
+	python3 -m coverage run -a -m vedro run tests/
+	python3 -m coverage report
+	python3 -m coverage xml -o $(or $(COV_REPORT_DEST),coverage.xml)
 
 .PHONY: check-types
 check-types:
@@ -44,14 +47,6 @@ lint: check-types check-style check-imports
 
 .PHONY: all
 all: install lint test
-
-.PHONY: test-in-docker
-test-in-docker:
-	docker run -v `pwd`:/tmp/app -w /tmp/app python:$(or $(PYTHON_VERSION),3.12) make install test
-
-.PHONY: all-in-docker
-all-in-docker:
-	docker run -v `pwd`:/tmp/app -w /tmp/app python:$(or $(PYTHON_VERSION),3.12) make all
 
 .PHONY: bump
 bump:
