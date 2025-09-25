@@ -1,10 +1,11 @@
-from baby_steps import then, when
+from vedro import scenario, then, when
 from vedro.core import Plugin
 
 from vedro_pw import Playwright, PlaywrightPlugin
 
 
-def test_plugin():
+@scenario("create plugin")
+def _():
     with when:
         plugin = PlaywrightPlugin(Playwright)
 
