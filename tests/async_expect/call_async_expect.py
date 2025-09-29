@@ -1,10 +1,8 @@
-from unittest.mock import call
-
 from vedro import catched, given, scenario, then, when
 
 from vedro_pw import expect
 
-from ._utils import make_api_response, make_locator, make_method_mock, make_page, patch_class
+from .._utils import opened_html_page
 
 # PageAssertions
 
@@ -12,43 +10,32 @@ from ._utils import make_api_response, make_locator, make_method_mock, make_page
 @scenario("[PageAssertions] call async expect")
 async def _():
     with given:
-        page = make_page()
-        page_assertions = make_method_mock(to_have_title=None)
+        title = "<title>"
+        page = await opened_html_page(title=title)
 
-        target = "vedro_pw._async_expect.PageAssertionsImpl"
-
-    with when, patch_class(target, page_assertions):
-        await expect(page).to_have_title("<title>")
+    with when:
+        res = await expect(page).to_have_title(title)
 
     with then:
-        assert page_assertions.mock_calls == [
-            call.to_have_title(titleOrRegExp="<title>", timeout=None)
-        ]
+        assert res is True
 
 
 @scenario("[PageAssertions] call async expect that raises error")
 async def _():
     with given:
-        page = make_page()
-        exception = AssertionError("Title mismatch")
-        page_assertions = make_method_mock(to_have_title=exception)
+        page = await opened_html_page(title="Actual Title")
 
-        target = "vedro_pw._async_expect.PageAssertionsImpl"
-
-    with when, patch_class(target, page_assertions), catched() as exc_info:
-        await expect(page).to_have_title("<title>")
+    with when, catched() as exc_info:
+        await expect(page).to_have_title("Wrong Title", timeout=1000)
 
     with then:
-        assert page_assertions.mock_calls == [
-            call.to_have_title(titleOrRegExp="<title>", timeout=None)
-        ]
-        assert exc_info.value == exception
+        assert exc_info.type is AssertionError
 
 
 @scenario("[PageAssertions] try to call async expect with non-existing method")
 async def _():
     with given:
-        page = make_page()
+        page = await opened_html_page(title="Test Page")
 
     with when, catched() as exc_info:
         await expect(page).non_existing()
@@ -64,43 +51,35 @@ async def _():
 @scenario("[LocatorAssertions] call async expect")
 async def _():
     with given:
-        locator = make_locator()
-        locator_assertions = make_method_mock(to_have_id=None)
+        element_id = "test-id"
+        page = await opened_html_page(body=f'<div id="{element_id}">Test Element</div>')
+        locator = page.locator(f"#{element_id}")
 
-        target = "vedro_pw._async_expect.LocatorAssertionsImpl"
-
-    with when, patch_class(target, locator_assertions):
-        await expect(locator).to_have_id("<id>")
+    with when:
+        res = await expect(locator).to_have_id(element_id)
 
     with then:
-        assert locator_assertions.mock_calls == [
-            call.to_have_id(id="<id>", timeout=None)
-        ]
+        assert res is True
 
 
 @scenario("[LocatorAssertions] call async expect that raises error")
 async def _():
     with given:
-        locator = make_locator()
-        exception = AssertionError("ID mismatch")
-        locator_assertions = make_method_mock(to_have_id=exception)
+        page = await opened_html_page(body='<div id="actual-id">Test Element</div>')
+        locator = page.locator("#actual-id")
 
-        target = "vedro_pw._async_expect.LocatorAssertionsImpl"
-
-    with when, patch_class(target, locator_assertions), catched() as exc_info:
-        await expect(locator).to_have_id("<id>")
+    with when, catched() as exc_info:
+        await expect(locator).to_have_id("wrong-id", timeout=1000)
 
     with then:
-        assert locator_assertions.mock_calls == [
-            call.to_have_id(id="<id>", timeout=None)
-        ]
-        assert exc_info.value == exception
+        assert exc_info.type is AssertionError
 
 
 @scenario("[LocatorAssertions] try to call async expect with non-existing method")
 async def _():
     with given:
-        locator = make_locator()
+        page = await opened_html_page(body='<div>Test Element</div>')
+        locator = page.locator("div")
 
     with when, catched() as exc_info:
         await expect(locator).non_existing()
@@ -115,43 +94,34 @@ async def _():
 @scenario("[APIResponseAssertions] call async expect")
 async def _():
     with given:
-        api_response = make_api_response()
-        api_response_assertions = make_method_mock(to_be_ok=None)
+        page = await opened_html_page(title="Test")
+        api_response = await page.request.get(page.url)
 
-        target = "vedro_pw._async_expect.APIResponseAssertionsImpl"
-
-    with when, patch_class(target, api_response_assertions):
-        await expect(api_response).to_be_ok()
+    with when:
+        res = await expect(api_response).to_be_ok()
 
     with then:
-        assert api_response_assertions.mock_calls == [
-            call.to_be_ok()
-        ]
+        assert res is True
 
 
 @scenario("[APIResponseAssertions] call async expect that raises error")
 async def _():
     with given:
-        api_response = make_api_response()
-        exception = AssertionError("Response not OK")
-        api_response_assertions = make_method_mock(to_be_ok=exception)
+        page = await opened_html_page(title="Test")
+        api_response = await page.request.get(page.url + "/non-existent-endpoint-404")
 
-        target = "vedro_pw._async_expect.APIResponseAssertionsImpl"
-
-    with when, patch_class(target, api_response_assertions), catched() as exc_info:
+    with when, catched() as exc_info:
         await expect(api_response).to_be_ok()
 
     with then:
-        assert api_response_assertions.mock_calls == [
-            call.to_be_ok()
-        ]
-        assert exc_info.value == exception
+        assert exc_info.type is AssertionError
 
 
 @scenario("[APIResponseAssertions] try to call async expect with non-existing method")
 async def _():
     with given:
-        api_response = make_api_response()
+        page = await opened_html_page(title="Test")
+        api_response = await page.request.get(page.url)
 
     with when, catched() as exc_info:
         await expect(api_response).non_existing()
