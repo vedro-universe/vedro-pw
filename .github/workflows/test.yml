@@ -19,7 +19,7 @@ jobs:
 
     container:
       image: mcr.microsoft.com/playwright/python:v1.54.0-noble
-      options: --user 1001
+      options: --user root
 
     strategy:
       matrix:
@@ -36,8 +36,8 @@ jobs:
 
     - name: Install make
       run: |
-        sudo apt-get update
-        sudo apt-get install -y make
+        apt-get update
+        apt-get install -y make
 
     - name: Install dependencies
       run: make install
