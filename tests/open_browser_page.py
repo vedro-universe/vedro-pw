@@ -1,8 +1,8 @@
 import jj
-from jj.mock import mocked, Mocked
-from vedro import scenario, when, then, given
+from jj.mock import Mocked, mocked
+from vedro import given, scenario, then, when
 
-from vedro_pw import opened_browser_page, expect
+from vedro_pw import expect, opened_browser_page
 
 
 @scenario("open blank page")
