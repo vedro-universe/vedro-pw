@@ -31,7 +31,7 @@ To install manually, follow these steps:
 1. Install the package using pip:
 
 ```shell
-$ pip3 install vedro-pw
+$ pip install vedro-pw
 ```
 
 2. Next, activate the plugin in your `vedro.cfg.py` configuration file:
