@@ -29,6 +29,7 @@ coverage:
 .PHONY: check-types
 check-types:
 	python3 -m mypy ${PROJECT_NAME} --strict
+	python3 -m mypy tests/
 
 .PHONY: check-imports
 check-imports:
