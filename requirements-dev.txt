@@ -5,3 +5,4 @@ flake8==7.1.1
 isort==5.13.2
 mypy==1.13.0
 typing_extensions==4.12.2
+vedro_jj==0.2.0
