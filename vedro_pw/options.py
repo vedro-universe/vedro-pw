@@ -87,8 +87,11 @@ class ConnectOptions(TypedDict, total=False):
     Defines all configurable parameters for the `connect` method of the `BrowserType` class.
     """
 
-    ws_endpoint: str
+    endpoint: str
     """A browser websocket endpoint to connect to."""
+
+    ws_endpoint: str
+    """Deprecated alias for `endpoint`. Kept for backward compatibility."""
 
     timeout: float
     """Maximum time in milliseconds to wait for the connection to be established."""

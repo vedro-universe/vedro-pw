@@ -1,3 +1,4 @@
+import warnings
 from typing import Any, Dict, Optional, Union, overload
 
 from playwright.async_api import Browser, BrowserContext, Page
@@ -141,11 +142,24 @@ async def launched_remote_browser(browser_name: Optional[Union[PlaywrightBrowser
     if playwright is None:
         playwright = await get_playwright_instance(auto_close=auto_close)
 
+    if "ws_endpoint" in kwargs:
+        warnings.warn(
+            "'ws_endpoint' is deprecated and will be removed in a future version. "
+            "Use 'endpoint' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
     options: Dict[str, Any] = {
-        **kwargs,
-        "ws_endpoint": kwargs.get("ws_endpoint", _runtime_config.remote_endpoint),
-        "slow_mo": kwargs.get("slow_mo", _runtime_config.slowmo),
+        key: value
+        for key, value in kwargs.items()
+        if key != "ws_endpoint"
     }
+    options["endpoint"] = kwargs.get(
+        "endpoint",
+        kwargs.get("ws_endpoint", _runtime_config.remote_endpoint),
+    )
+    options["slow_mo"] = kwargs.get("slow_mo", _runtime_config.slowmo)
 
     browser_type = get_browser_type(playwright, browser_name or _runtime_config.browser_name)
     browser_instance = await browser_type.connect(**options)
